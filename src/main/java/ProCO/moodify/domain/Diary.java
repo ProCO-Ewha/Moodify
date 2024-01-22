@@ -37,6 +37,7 @@ public class Diary {
         member.getDiaries().add(this);
     }
 
+
     // Business Logic
     public static Diary createDiary(Member author, String pic, String text, AlignStatus align, PrivacyStatus privacy, Emotion emotion ) {
         Diary diary = new Diary();
