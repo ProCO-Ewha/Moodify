@@ -1,0 +1,13 @@
+.back-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.back-button-img {
+  width: 30px; /* 원하는 이미지 너비 설정 */
+  height: 30px; /* 원하는 이미지 높이 설정 */
+  position: relative;
+  top: -160px;
+  left: -180px
+}

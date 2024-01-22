@@ -1,0 +1,103 @@
+body, h1, h2, h3, p, button {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: #f2f0e9;
+  color: #000000;
+  text-align: center;
+  padding: 20px;
+}
+
+#logo-text {
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 80px;
+  color: #000000;
+  margin-top: 100px;
+  margin-left: 5px; 
+  margin:90px;
+}
+
+.smalltext{
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 13px;
+  color: #000000;
+  margin-top: 15px;
+}
+
+.black-button-group button{
+  font-family: 'Ubuntu', sans-serif;
+  text-align: center;
+  margin-top: 100px;
+  margin-left: 5px;
+  background-color: black; /* 검정색 배경 */
+  color: white; /* 흰색 글자 */
+  border-radius: 30px;
+  width: 350px;
+  height:50px;
+  margin: 10px;
+}
+
+.grey-button-group button{
+  font-family: 'Ubuntu', sans-serif;
+  text-align: center;
+  margin-top: 100px;
+  margin-left: 5px;
+  background-color: #C8C4B7; /* 검정색 배경 */
+  color: #000000;
+  border-radius: 30px;
+  width: 350px;
+  height:50px;
+  border: none;
+  margin: 10px;
+}
+
+.input-button-group button{
+  font-family: 'Ubuntu', sans-serif;
+  text-align: left;
+  margin-top: 100px;
+  margin-left: 5px;
+  background-color: #f5f4f2;
+  color: #000000;
+  border-radius: 30px;
+  width: 350px;
+  height:50px;
+  border: none;
+  font-size: 15px;
+  margin: 10px;
+}
+
+.input-button-group input{
+  font-family: 'Ubuntu', sans-serif;
+  text-align: left; 
+  margin-top: 10px;
+  margin-left: 5px;
+  background-color: #f5f4f2;
+  color: #000000;
+  border-radius: 30px;
+  width: 350px;
+  height: 50px;
+  border: none;
+  font-size: 15px;
+  margin-bottom: 10px;
+  outline: none;
+}
+
+.main-image {
+  width: 30%; /* 부모 요소에 맞게 이미지를 확장 */
+  height: auto; /* 가로 세로 비율 유지 */
+  border: 0; /* 이미지 주위의 border 없애기 */
+  display: block; /* 기본 inline 스타일 제거 */
+  position: absolute;
+  top: 85%; /* 부모 요소의 중간을 기준으로 위에서 50% 위치 */
+  left: 49%; /* 부모 요소의 중간을 기준으로 왼쪽에서 50% 위치 */
+  transform: translate(-50%, -50%); /* 중앙 정렬을 위한 변환 */
+}
+
+
+@media (max-width: 767px) {
+  .main-image {
+    width: 80%;
+  }
+}
