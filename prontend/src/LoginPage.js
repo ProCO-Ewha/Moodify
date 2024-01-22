@@ -1,6 +1,7 @@
 import React from 'react';
 import './LoginPage.css';
 import './index.css';
+import HomeComponent from './HomeComponent';
 import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
 import  { useState } from 'react';
@@ -9,6 +10,7 @@ import { useUser } from './UserContext';
   const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
     const { login } = useUser();
     const navigate = useNavigate();
 
@@ -29,10 +31,31 @@ import { useUser } from './UserContext';
   };
 
   const handleNameChange = (e) => {
-    setPassword(e.target.value);
+    setName(e.target.value);
   };
 
+
   const handleLogin = async () => {
+    try {
+      // 가상의 사용자 정보
+      const fakeUserData = {
+        id: 123,
+        email: 'test@example.com',
+        // ... 기타 사용자 정보 ...
+      };
+
+      // 가상의 로그인 성공
+      login(fakeUserData);
+
+      // 메인 달력 페이지로 이동
+      navigate('/HomeComponent');
+    } catch (error) {
+      // 로그인 실패 시 처리
+      alert(error.message);
+    }
+  };
+
+  /*const handleLogin = async () => {
     try {
       // 서버에 로그인 요청을 보냄
       const response = await fetch('서버의 로그인 API 주소', {
@@ -54,12 +77,12 @@ import { useUser } from './UserContext';
       login(userData);
 
       // 메인 달력 페이지로 이동
-      navigate('/home');
+      navigate('/HomeComponent');
     } catch (error) {
       // 로그인 실패 시 처리
       alert(error.message);
     }
-  };
+  };*/
 
   return (
     <div className='login'>
