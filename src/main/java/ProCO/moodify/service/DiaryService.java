@@ -19,21 +19,16 @@ public class DiaryService {
 
     // 일기 작성
     @Transactional
-    public Long write( Long memberId,
-                       String pic,
-                       String text,
-                       AlignStatus alignStatus,
-                       PrivacyStatus privacyStatus,
-                       Emotion emotion) {
+    public Long write( Long memberId, Diary diary) {
         Member member = memberRepository.findOne(memberId);
-        Diary diary = Diary.createDiary(member, pic, text, alignStatus, privacyStatus, emotion);
+//        Diary diary = Diary.createDiary(member, pic, text, alignStatus, privacyStatus, emotion);
         diaryRepository.save(diary);
         return diary.getId();
     }
-
     // 일기 수정
-    public void changePrivacy (Long diaryId, PrivacyStatus privacy ) {
+    public void editPrivacy (Long diaryId) {
         Diary diary = diaryRepository.findOne(diaryId);
+        PrivacyStatus privacy = diary.getPrivacyStatus();
         if (privacy == PrivacyStatus.PRIVATE) {
             diary.setPrivacyStatus(PrivacyStatus.PUBLIC);
         }
@@ -42,12 +37,11 @@ public class DiaryService {
         }
         diaryRepository.save(diary);
     }
-
     // 일기 조회
     public Diary getDiaryDetails(Long diaryId) {
         return diaryRepository.findOne(diaryId);
     }
-    // 일기별 좋아요 조회: 좋아요한 사용자 조회, 일기 조회 시 같이 전달
+    // 일기별 좋아요 조회: 좋아요한 사용자 + 좋아요 수
     private List<Like> getLikesByDiary(Long diaryId) {
         Diary diary = diaryRepository.findOne(diaryId);
         if (diary != null) {
@@ -56,19 +50,28 @@ public class DiaryService {
             throw new IllegalArgumentException("존재하지 않는 다이어리입니다.");
         }
     }
-    public List<Member> whoLiked(Long diaryId) {
+    public String whoLiked(Long diaryId) {
         List<Like> likes = getLikesByDiary(diaryId);
         List<Member> likers = new ArrayList<>();
         for (Like like : likes) {
             likers.add(like.getLiker());
         }
-        return likers;
+        return likers.get(likers.size()-1).getName();
     }
-
-    // 월별 조회 : 프론트엔드랑 데이터 어떻게 주고 받을지 봐야됨 ㅎㅎ 신호만 주고 받기 vs 월 정보를 아예 주고 받기
+    public int getLikeCount(Long diaryId) {
+        List<Like> likes = getLikesByDiary(diaryId);
+        List<Member> likers = new ArrayList<>();
+        for (Like like : likes) {
+            likers.add(like.getLiker());
+        }
+        return likers.size();
+    }
+    //월별 조회
     public List<Diary> getDiariesByMonth(Long memberId, int year, int month) {
-        return null;
+        return diaryRepository.findDiariesByIdAndMonth(memberId, year, month);
     }
-
-
+    //날짜에 의한 조회 -> 이후 다이어리 조회 예정
+    public Diary getDiaryIdByDate(Long memberId, int year, int month, int day) {
+        return diaryRepository.findDiariesByIdAndDate(memberId, year, month, day);
+    }
 }

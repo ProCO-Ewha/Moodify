@@ -16,7 +16,11 @@ public class MemberRepository {
     private EntityManager em;
 
     public void save(Member member) {
-        em.persist(member);
+        if (member.getId() == null) {
+            em.persist(member);
+        } else {
+            em.merge(member);
+        }
     }
     public Member findOne(Long id) {
         return em.find(Member.class, id);
@@ -36,16 +40,9 @@ public class MemberRepository {
         return members.isEmpty() ? null : members.get(0);
     }
     public List<Member> search(String keyword){
-        // JPQL을 이용한 동적 쿼리 작성
         String jpql = "select m from Member m where m.name like :keyword or m.email like :keyword";
-
-        // JPQL을 TypedQuery로 변환
         TypedQuery<Member> query = em.createQuery(jpql, Member.class);
-
-        // 파라미터 설정
         query.setParameter("keyword", "%" + keyword + "%");
-
-        // 쿼리 실행 및 결과 반환
         return query.getResultList();
     }
 

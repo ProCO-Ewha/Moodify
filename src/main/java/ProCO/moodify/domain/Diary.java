@@ -37,17 +37,17 @@ public class Diary {
         member.getDiaries().add(this);
     }
 
-
     // Business Logic
-    public static Diary createDiary(Member author, String pic, String text, AlignStatus align, PrivacyStatus privacy, Emotion emotion ) {
-        Diary diary = new Diary();
-        diary.setAuthor(author);
-        diary.setDate(LocalDateTime.now());
-        diary.setPic(pic);
-        diary.setAlignStatus(align);
-        diary.setEmotion(emotion);
-        diary.setText(text);
-        diary.setPrivacyStatus(privacy);
-        return diary;
-    }
+//    public static Diary createDiary(Member author, String pic, String text, AlignStatus align, PrivacyStatus privacy, Emotion emotion ) {
+//        Diary diary = new Diary();
+//        diary.setAuthor(author);
+//        diary.setDate(LocalDateTime.now());
+//        diary.setPic(pic);
+//        diary.setAlignStatus(align);
+//        diary.setEmotion(emotion);
+//        diary.setText(text);
+//        diary.setPrivacyStatus(privacy);
+//        return diary;
+//    }
+
 }

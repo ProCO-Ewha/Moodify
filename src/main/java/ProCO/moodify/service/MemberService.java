@@ -26,31 +26,32 @@ public class MemberService {
         memberRepository.save(member);
         return member.getId();
     }
-
     private void validateDuplicateMember(Member member) {
         List<Member> findMembers = memberRepository.findByName(member.getName());
         if (!findMembers.isEmpty()) {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
     }
+
     //회원 수정
-
-    public Long change(Member updatedMember) {
-        // 수정하려는 회원을 데이터베이스에서 조회
-        Member existingMember = memberRepository.findOne(updatedMember.getId());
-
-        // 조회된 회원이 없으면 예외 발생
-        if (existingMember == null) {
-            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-        }
-
-        // 수정하려는 회원의 정보를 업데이트
-        existingMember.setName(updatedMember.getName());
-        existingMember.setEmail(updatedMember.getEmail());
-        existingMember.setPw(updatedMember.getPw());
-
-        memberRepository.save(existingMember);
-        return existingMember.getId();
+    public Long saveMember (Member updatedMember) {
+//        // 수정하려는 회원을 데이터베이스에서 조회
+//        Member existingMember = memberRepository.findOne(updatedMember.getId());
+//
+//        // 조회된 회원이 없으면 예외 발생
+//        if (existingMember == null) {
+//            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
+//        }
+//
+//        // 수정하려는 회원의 정보를 업데이트
+//        existingMember.setName(updatedMember.getName());
+//        existingMember.setEmail(updatedMember.getEmail());
+//        existingMember.setPw(updatedMember.getPw());
+//
+//        memberRepository.save(existingMember);
+//        return existingMember.getId();
+        memberRepository.save(updatedMember);
+        return updatedMember.getId();
     }
 
     //회원 조회
@@ -62,14 +63,10 @@ public class MemberService {
     }
 
     // 회원 검색: email과 name을 기준으로 보여줄 것, JPQL
-    public List<Member> searchMember(String keyword) {
-        return memberRepository.search(keyword);
-    }
-
-
+    public List<Member> searchMember(String keyword) {return memberRepository.search(keyword);}
 
     //로그인
-    public Long logIn(String id, String pw) {
+    public Long login(String id, String pw) {
         // 아이디로 회원 찾기
         Member member = memberRepository.findByEmail(id);
 
@@ -81,8 +78,6 @@ public class MemberService {
             throw new IllegalArgumentException("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.");
         }
     }
-
-
 
     //친구 추가
     public void addFriend(Long memberId, Long friendId) {
@@ -116,4 +111,8 @@ public class MemberService {
         }
     }
 
+    public List<Member> getAllFriends(Long memberId) {
+        Member member = memberRepository.findOne(memberId);
+        return member.getFriends();
+    }
 }
