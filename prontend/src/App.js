@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import LoginPage from './LoginPage';
 import SignUpPage from './SignUpPage';
 import ResetPassword from './ResetPassword';
+import HomeComponent from './HomeComponent';
 import './index.css';
 import { UserProvider } from './UserContext';
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="/LoginPage" element={<LoginPage />} />
         <Route path="/SignUpPage" element={<SignUpPage />} />
         <Route path="/ResetPassword" element={<ResetPassword />} />
+        <Route path="/HomeComponent" element={<HomeComponent />} />
       </Routes>
       </UserProvider>
     </Router>

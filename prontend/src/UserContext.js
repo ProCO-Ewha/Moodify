@@ -8,9 +8,17 @@ export const UserProvider = ({ children }) => {
     calendarData: [],
   });
 
-  const login = (userData) => {
+  /*const login = (userData) => {
     setUser(userData);
+  };*/
+
+  const login = (userData) => {
+    setUser({
+      ...userData,
+      calendarData: Array.isArray(userData.calendarData) ? userData.calendarData : [],
+    });
   };
+  
 
   const logout = () => {
     setUser({
@@ -59,3 +67,5 @@ export const useUser = () => {
   }
   return context;
 };
+
+export default UserContext;
