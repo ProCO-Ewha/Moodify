@@ -19,7 +19,7 @@ public class DiaryService {
 
     // 일기 작성
     @Transactional
-    public Long write( Long memberId, Diary diary) {
+    public Long write(Long memberId, Diary diary) {
         Member member = memberRepository.findOne(memberId);
 //        Diary diary = Diary.createDiary(member, pic, text, alignStatus, privacyStatus, emotion);
         diaryRepository.save(diary);

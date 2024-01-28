@@ -2,98 +2,84 @@ package ProCO.moodify.web;
 
 import ProCO.moodify.domain.Diary;
 import ProCO.moodify.domain.Member;
-import ProCO.moodify.repository.DiaryRepository;
 import ProCO.moodify.service.DiaryService;
 import ProCO.moodify.service.LikeService;
+import ProCO.moodify.web.DiaryForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/diaries")
 public class DiaryController {
     private final DiaryService diaryService;
     private final LikeService likeService;
 
-    //일기 작성
-    @GetMapping(value = "/write")
-    public String writeForm(Model model) {
-        model.addAttribute("diaryForm", new DiaryForm());
-        return "write/diaryForm";
-    }
-    @PostMapping(value = "/diaries/new")
-    public String write(@Valid DiaryForm form, BindingResult result, RedirectAttributes redirectAttributes) {
+    @PostMapping("/new")
+    public ResponseEntity<Long> write(@Valid @RequestBody DiaryForm form, BindingResult result) {
         if (result.hasErrors()) {
-            return "members/diaryForm";
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        // Spring Security를 이용하여 현재 인증된 사용자의 정보를 가져옴
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String currentUsername = authentication.getName(); // 현재 로그인된 사용자의 username을 가져옴
-//
-//        // 현재 로그인된 사용자의 username 또는 ID를 사용하여 해당 회원의 정보를 가져옴
-//        Member currentMember = memberService.findByUsername(currentUsername);
-//        Long memberId = currentMember.getId();
 
-        Member currentMember = null;
-        Long memberId = 01L;  // 위 코드가 있으면 삭제 해도 됨
+        System.out.println(form);
+        System.out.println(form.getAuthor());
+        Member author = form.getAuthor();
 
+        // 작성자의 ID 설정
+        Long authorId = form.getAuthor().getId();
+        System.out.println(authorId);
+        // 일기 작성 처리
         Diary diary = new Diary();
-        diary.setAuthor(currentMember); // 현재 로그인된 회원을 작성자로 설정
+        diary.setAuthor(form.getAuthor()); // 작성자의 ID 설정
         diary.setEmotion(form.getEmotion());
         diary.setPic(form.getPic());
-        diary.setText(form.getText());
+        diary.setText(form.getTxt());
         diary.setDate(LocalDateTime.now());
         diary.setAlignStatus(form.getAlignStatus());
         diary.setPrivacyStatus(form.getPrivacyStatus());
 
-        Long diaryId = diaryService.write(memberId, diary);
+        Long diaryId = diaryService.write(authorId, diary);
 
-        // 생성된 다이어리의 아이디를 사용하여 리다이렉트 주소 생성
-        redirectAttributes.addAttribute("diaryId", diaryId);
-        return "redirect:/diaries/{diaryId}/view";
+        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
     }
 
-    @GetMapping("/diaries/{diaryId}/view")
-    public String viewDiary(@PathVariable Long diaryId, Model model) {
+
+    @GetMapping("/{diaryId}")
+    public ResponseEntity<Diary> viewDiary(@PathVariable Long diaryId) {
         Diary diary = diaryService.getDiaryDetails(diaryId);
-        int likeCount = diaryService.getLikeCount(diaryId);
-        String whoLiked = diaryService.whoLiked(diaryId);
-
-        model.addAttribute("diary", diary);
-        model.addAttribute("likeCount", likeCount);
-        model.addAttribute("whoLiked", whoLiked);
-        return "diary/view"; // 일기 조회 페이지의 이름
+        return new ResponseEntity<>(diary, HttpStatus.OK);
     }
-
-    // 일기 수정: 여기서도 회원 권한 수정 필요
-    @PostMapping("/diaries/{diaryId}/edit")
-    public String editDiary(@PathVariable Long diaryId, @RequestParam String newContent) {
+    @PostMapping("/{diaryId}/edit")
+    public ResponseEntity<Void> editDiary(@PathVariable Long diaryId) {
         diaryService.editPrivacy(diaryId);
-        return "redirect:/diary/{diaryId}/view"; // 수정된 일기를 보여주는 페이지로 리다이렉트
+        // 수정이 완료되면 해당 다이어리를 조회하는 URL로 리다이렉트
+        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                .location(URI.create("/" + diaryId))
+                .build();
     }
-    // 일기 좋아요 등록
-    @PostMapping("/diaries/{diaryId}/like/add")
-    public String addLike(@PathVariable Long diaryId) {
-        Diary diary = diaryService.getDiaryDetails(diaryId);
-        Member liker = null; //현재 로그인한 회원 정보 받아 와야 함
-        likeService.addLike(liker.getId(), diaryId);
-        return "redirect:/diary/{diaryId}/view"; // 일기 조회 페이지로 리다이렉트
+    @PostMapping("/{diaryId}/like/add")
+    public ResponseEntity<Void> addLike(@PathVariable Long diaryId, @RequestParam Long likerId) {
+        likeService.addLike(likerId, diaryId);
+        // 좋아요 추가 후 해당 다이어리를 조회하는 URL로 리다이렉트
+        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                .location(URI.create("/" + diaryId))
+                .build();
     }
-    // 일기 좋아요 취소
-    @PostMapping("/diaries/{diaryId}/like/remove")
-    public String deleteLike(@PathVariable Long deleteId) {
-        Diary diary = diaryService.getDiaryDetails(deleteId);
-        Member liker = null; //현재 로그인한 회원 정보 받아 와야 함
-        likeService.cancelLike(liker.getId(), deleteId);
-        return "redirect:/diary/{diaryId}/view"; // 일기 조회 페이지로 리다이렉트
+
+    @PostMapping("/{diaryId}/like/remove")
+    public ResponseEntity<Void> deleteLike(@PathVariable Long diaryId, @RequestParam  Long likerId) {
+        likeService.cancelLike(likerId, diaryId);
+        // 좋아요 삭제 후 해당 다이어리를 조회하는 URL로 리다이렉트
+        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                .location(URI.create("/" + diaryId))
+                .build();
     }
+
 }

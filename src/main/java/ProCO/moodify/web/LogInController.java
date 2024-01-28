@@ -2,32 +2,29 @@ package ProCO.moodify.web;
 
 import ProCO.moodify.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.Map;
+
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/login")
 public class LogInController {
     private final MemberService memberService;
-    //Todo
-    @GetMapping
-    public String loginForm() {
-        return "login"; // 로그인 폼 페이지의 이름 (예: login.html)
-    }
-
     @PostMapping
-    public String login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<String> login(@RequestBody Map<String, String> login) {
+        String username = login.get("name");
+        String password = login.get("pw");
+
         Long loginSuccess = memberService.login(username, password);
 
-        // 로그인 성공 시 캘린더 화면으로 리다이렉트
-        if (loginSuccess!=null) {
-            return "redirect:/calendar"; // 캘린더 화면의 경로 (예: /calendar)
+        if (loginSuccess != null) {
+            return new ResponseEntity<>("Login successful", HttpStatus.OK);
         } else {
-            return "redirect:/login?error";
+            return new ResponseEntity<>("Login failed", HttpStatus.UNAUTHORIZED);
         }
     }
+
 }

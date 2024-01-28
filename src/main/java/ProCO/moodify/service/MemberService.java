@@ -20,9 +20,9 @@ public class MemberService {
     MemberRepository memberRepository;
 
     //회원등록
-    @Transactional //변경
+    @Transactional
     public Long join(Member member) {
-        validateDuplicateMember(member); //중복 회원 검증
+        validateDuplicateMember(member);
         memberRepository.save(member);
         return member.getId();
     }
@@ -34,6 +34,7 @@ public class MemberService {
     }
 
     //회원 수정
+    @Transactional
     public Long saveMember (Member updatedMember) {
 //        // 수정하려는 회원을 데이터베이스에서 조회
 //        Member existingMember = memberRepository.findOne(updatedMember.getId());
@@ -66,28 +67,34 @@ public class MemberService {
     public List<Member> searchMember(String keyword) {return memberRepository.search(keyword);}
 
     //로그인
-    public Long login(String id, String pw) {
-        // 아이디로 회원 찾기
-        Member member = memberRepository.findByEmail(id);
+    public Long login(String name, String pw) {
+        List<Member> members = memberRepository.findByName(name);
 
-        // 회원이 존재하고 비밀번호가 일치하면 회원 ID 반환
-        if (member != null && member.getPw().equals(pw)) {
-            return member.getId();
-        } else {
-            // 인증 실패 시 예외 처리
-            throw new IllegalArgumentException("로그인 실패: 아이디 또는 비밀번호가 일치하지 않습니다.");
+        if (members.isEmpty()) {
+            throw new IllegalArgumentException("로그인 실패: 존재하지 않는 회원");
         }
+        for (Member member : members) {
+            if (member.getPw().equals(pw)) {
+                // 비밀번호가 일치하면 회원 ID 반환
+                return member.getId();
+            }
+        }
+        throw new IllegalArgumentException("로그인 실패: 비밀번호가 일치하지 않습니다.");
     }
 
+
     //친구 추가
+    @Transactional
     public void addFriend(Long memberId, Long friendId) {
         Member member = memberRepository.findOne(memberId);
         Member friend = memberRepository.findOne(friendId);
 
         if (member != null && friend != null) {
+
             member.getFriends().add(friend);
             friend.getFriends().add(member);
-
+            System.out.println(member.getFriends());
+            System.out.println(friend.getFriends());
             memberRepository.save(member);
             memberRepository.save(friend);
         } else {
@@ -96,6 +103,7 @@ public class MemberService {
     }
 
     // 친구 삭제
+    @Transactional
     public void deleteFriend(Long memberId, Long friendId) {
         Member member = memberRepository.findOne(memberId);
         Member friend = memberRepository.findOne(friendId);
