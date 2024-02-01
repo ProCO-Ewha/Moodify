@@ -1,6 +1,8 @@
 package ProCO.moodify.service;
 
 import ProCO.moodify.domain.*;
+import ProCO.moodify.dto.DiaryDTO;
+import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ public class DiaryService {
     // 일기 작성
     @Transactional
     public Long write(Long memberId, Diary diary) {
-        Member member = memberRepository.findOne(memberId);
+//        Member member = memberRepository.findOne(memberId);
 //        Diary diary = Diary.createDiary(member, pic, text, alignStatus, privacyStatus, emotion);
         diaryRepository.save(diary);
         return diary.getId();
@@ -38,10 +40,12 @@ public class DiaryService {
         diaryRepository.save(diary);
     }
     // 일기 조회
-    public Diary getDiaryDetails(Long diaryId) {
-        return diaryRepository.findOne(diaryId);
+    public DiaryDTO getDiaryDetails(Long diaryId) {
+        Diary diary = diaryRepository.findOne(diaryId);
+        DiaryDTO diaryDTO = mapToDTO(diary);
+        return diaryDTO;
     }
-    // 일기별 좋아요 조회: 좋아요한 사용자 + 좋아요 수
+    // 일기별 좋아요 조회: 좋아요한 사용자 + 좋아요 수, 이게 왜 필요한건지 모르겟음... ㅎ
     private List<Like> getLikesByDiary(Long diaryId) {
         Diary diary = diaryRepository.findOne(diaryId);
         if (diary != null) {
@@ -67,11 +71,32 @@ public class DiaryService {
         return likers.size();
     }
     //월별 조회
-    public List<Diary> getDiariesByMonth(Long memberId, int year, int month) {
-        return diaryRepository.findDiariesByIdAndMonth(memberId, year, month);
+    public List<DiaryDTO> getDiariesByMonth(Long memberId, int year, int month) {
+        List<Diary> diaryList = diaryRepository.findDiariesByIdAndMonth(memberId, year, month);
+        List<DiaryDTO> diaryDTOList = new ArrayList<>();
+
+        for ( Diary diary : diaryList){
+            diaryDTOList.add(mapToDTO(diary));
+        }
+        return diaryDTOList;
     }
     //날짜에 의한 조회 -> 이후 다이어리 조회 예정
     public Diary getDiaryIdByDate(Long memberId, int year, int month, int day) {
         return diaryRepository.findDiariesByIdAndDate(memberId, year, month, day);
     }
+    private DiaryDTO mapToDTO(Diary diary) {
+        DiaryDTO diaryDTO =  new DiaryDTO();
+        diaryDTO.setId(diary.getId());
+        diaryDTO.setAuthorId(diary.getAuthorId());
+        diaryDTO.setText(diary.getText());
+        diaryDTO.setPic(diary.getPic());
+        diaryDTO.setEmotion(diary.getEmotion());
+        diaryDTO.setPrivacyStatus(diary.getPrivacyStatus());
+        diaryDTO.setAlignStatus(diary.getAlignStatus());
+        diaryDTO.setDate(diary.getDate());
+        diaryDTO.setLikeCnt(getLikeCount(diary.getId()));
+        diaryDTO.setLiker(whoLiked(diary.getId()));
+        return diaryDTO;
+    }
+
 }

@@ -1,6 +1,7 @@
 package ProCO.moodify.web;
 
 import ProCO.moodify.domain.Member;
+import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,6 @@ public class MemberController {
         return new ResponseEntity<>("Member created successfully", HttpStatus.CREATED);
     }
 
-    //Todo
     // 회원 정보 수정
     @PutMapping("/{memberId}/edit")
     public ResponseEntity<String> update(@PathVariable("memberId") Long memberId, @RequestBody MemberForm form) {
@@ -51,8 +51,8 @@ public class MemberController {
     }
     //회원 정보 조회
     @GetMapping("/{memberId}")
-    public ResponseEntity<Member> getMember(@PathVariable Long memberId) {
-        Member member = memberService.findOne(memberId);
+    public ResponseEntity<MemberDTO> getMember(@PathVariable Long memberId) {
+        MemberDTO member = memberService.findOneDTO(memberId);
         if (member == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

@@ -1,22 +1,24 @@
-package ProCO.moodify.web;
+package ProCO.moodify.dto;
 
 import ProCO.moodify.domain.AlignStatus;
 import ProCO.moodify.domain.Emotion;
-import ProCO.moodify.domain.Member;
 import ProCO.moodify.domain.PrivacyStatus;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-public class DiaryForm {
+import java.time.LocalDateTime;
+import java.util.List;
+@Getter @Setter
+public class DiaryDTO {
+    private Long id;
     private Long authorId;
-    private String txt;
+    private String text;
     private String pic;
-    @NotNull(message = "감정을 선택하세요")
     private Emotion emotion;
     private PrivacyStatus privacyStatus;
     private AlignStatus alignStatus;
+    private LocalDateTime date;
+    private int likeCnt;
+    private String liker;
 }
+

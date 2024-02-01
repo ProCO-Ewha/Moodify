@@ -14,9 +14,7 @@ public class Diary {
     @Column(name = "diary_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member author;
+    private Long authorId;
     private String text;
     private String pic;
 
@@ -33,7 +31,7 @@ public class Diary {
 
     // Relationship Method
     public void setAuthor(Member member) {
-        this.author = member;
+        this.authorId = member.getId();
         member.getDiaries().add(this);
     }
 

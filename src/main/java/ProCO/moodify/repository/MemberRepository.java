@@ -8,6 +8,7 @@ import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Repository
@@ -36,7 +37,6 @@ public class MemberRepository {
         List<Member> members = em.createQuery("select m from Member m where m.email = :email", Member.class)
                 .setParameter("email", email)
                 .getResultList();
-
         return members.isEmpty() ? null : members.get(0);
     }
     public List<Member> search(String keyword){

@@ -1,6 +1,9 @@
 package ProCO.moodify.service;
 
+import ProCO.moodify.domain.Diary;
+import ProCO.moodify.domain.Like;
 import ProCO.moodify.domain.Member;
+import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -10,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,8 +32,8 @@ public class MemberService {
         return member.getId();
     }
     private void validateDuplicateMember(Member member) {
-        List<Member> findMembers = memberRepository.findByName(member.getName());
-        if (!findMembers.isEmpty()) {
+        Member findMember = memberRepository.findByEmail(member.getEmail());
+        if (findMember != null) {
             throw new IllegalStateException("이미 존재하는 회원입니다.");
         }
     }
@@ -59,12 +64,27 @@ public class MemberService {
     public List<Member> findMembers() {
         return memberRepository.findAll();
     }
+
     public Member findOne(Long memberId) {
         return memberRepository.findOne(memberId);
     }
+    public MemberDTO findOneDTO(Long memberId) {
+        Member member = memberRepository.findOne(memberId);
+        MemberDTO memberDTO = mapToDTO(member);
+        return memberDTO;
+    }
 
     // 회원 검색: email과 name을 기준으로 보여줄 것, JPQL
-    public List<Member> searchMember(String keyword) {return memberRepository.search(keyword);}
+//    public List<Member> searchMember(String keyword) {return memberRepository.search(keyword);}
+
+    public List<MemberDTO> searchMember(String keyword){
+        List<MemberDTO> memberDTOList = new ArrayList<>();
+        List<Member> memberList = memberRepository.search(keyword);
+        for (Member member : memberList) {
+            memberDTOList.add(mapToDTO(member));
+        }
+        return memberDTOList;
+    }
 
     //로그인
     public Long login(String name, String pw) {
@@ -93,8 +113,6 @@ public class MemberService {
 
             member.getFriends().add(friend);
             friend.getFriends().add(member);
-            System.out.println(member.getFriends());
-            System.out.println(friend.getFriends());
             memberRepository.save(member);
             memberRepository.save(friend);
         } else {
@@ -111,7 +129,6 @@ public class MemberService {
         if (member != null && friend != null) {
             member.getFriends().remove(friend);
             friend.getFriends().remove(member);
-
             memberRepository.save(member);
             memberRepository.save(friend);
         } else {
@@ -119,8 +136,32 @@ public class MemberService {
         }
     }
 
-    public List<Member> getAllFriends(Long memberId) {
+    public List<MemberDTO> getAllFriends(Long memberId) {
         Member member = memberRepository.findOne(memberId);
-        return member.getFriends();
+        List <MemberDTO> memberDTOList = new ArrayList<>();
+        List <Member> friends= member.getFriends();
+        for (Member friend : friends) {
+            memberDTOList.add(mapToDTO(friend));
+        }
+        return memberDTOList;
+    }
+
+    private MemberDTO mapToDTO(Member member) {
+        MemberDTO dto = new MemberDTO();
+        dto.setId(member.getId());
+        dto.setEmail(member.getEmail());
+        dto.setName(member.getName());
+
+        List<Long> diaryIds = member.getDiaries().stream()
+                .map(Diary::getId)
+                .collect(Collectors.toList());
+        dto.setDiaryIds(diaryIds);
+
+        List<Long> friendIds = member.getFriends().stream()
+                .map(Member::getId)
+                .collect(Collectors.toList());
+        dto.setFriendIds(friendIds);
+
+        return dto;
     }
 }

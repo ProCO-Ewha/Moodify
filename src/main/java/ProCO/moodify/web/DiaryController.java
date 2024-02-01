@@ -2,8 +2,10 @@ package ProCO.moodify.web;
 
 import ProCO.moodify.domain.Diary;
 import ProCO.moodify.domain.Member;
+import ProCO.moodify.dto.DiaryDTO;
 import ProCO.moodify.service.DiaryService;
 import ProCO.moodify.service.LikeService;
+import ProCO.moodify.service.MemberService;
 import ProCO.moodify.web.DiaryForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,23 +23,24 @@ import java.time.LocalDateTime;
 public class DiaryController {
     private final DiaryService diaryService;
     private final LikeService likeService;
+    private final MemberService memberService;
 
+    // 다이어리 작성: 나중에 폼에 로그인된 회원 들어오는지 확인 필요
     @PostMapping("/new")
     public ResponseEntity<Long> write(@Valid @RequestBody DiaryForm form, BindingResult result) {
         if (result.hasErrors()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         System.out.println(form);
-        System.out.println(form.getAuthor());
-        Member author = form.getAuthor();
+        Member member = memberService.findOne(form.getAuthorId());
+        System.out.println(member);
 
         // 작성자의 ID 설정
-        Long authorId = form.getAuthor().getId();
+        Long authorId = member.getId();
         System.out.println(authorId);
         // 일기 작성 처리
         Diary diary = new Diary();
-        diary.setAuthor(form.getAuthor()); // 작성자의 ID 설정
+        diary.setAuthor(member); // 작성자의 ID와 관계 설정
         diary.setEmotion(form.getEmotion());
         diary.setPic(form.getPic());
         diary.setText(form.getTxt());
@@ -49,13 +52,6 @@ public class DiaryController {
 
         return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
     }
-
-
-    @GetMapping("/{diaryId}")
-    public ResponseEntity<Diary> viewDiary(@PathVariable Long diaryId) {
-        Diary diary = diaryService.getDiaryDetails(diaryId);
-        return new ResponseEntity<>(diary, HttpStatus.OK);
-    }
     @PostMapping("/{diaryId}/edit")
     public ResponseEntity<Void> editDiary(@PathVariable Long diaryId) {
         diaryService.editPrivacy(diaryId);
@@ -64,6 +60,12 @@ public class DiaryController {
                 .location(URI.create("/" + diaryId))
                 .build();
     }
+    @GetMapping("/{diaryId}")
+    public ResponseEntity<DiaryDTO> viewDiary(@PathVariable Long diaryId) {
+        DiaryDTO diaryDTO = diaryService.getDiaryDetails(diaryId);
+        return new ResponseEntity<>(diaryDTO, HttpStatus.OK);
+    }
+
     @PostMapping("/{diaryId}/like/add")
     public ResponseEntity<Void> addLike(@PathVariable Long diaryId, @RequestParam Long likerId) {
         likeService.addLike(likerId, diaryId);
