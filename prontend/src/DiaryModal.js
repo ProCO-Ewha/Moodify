@@ -39,26 +39,40 @@ const DiaryModal = ({ onAdd, onEdit, onDelete, onClose, selectedEmoji, selectedT
     export default DiaryModal;*/
 
 // DiaryModal.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-const DiaryModal = ({ onAdd, onClose, selectedEmoji, selectedText, selectedDate: initialDate, isAdding }) => { // isAdding 추가
+const DiaryModal = ({ onAdd, onClose, selectedEmoji, selectedText, selectedDate: initialDate, isAdding }) => {
   const [diaryText, setDiaryText] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null); // 미리보기 이미지 상태 추가
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]; // 파일 객체 가져오기
+    setSelectedImage(file); // 파일 객체 상태에 저장
+
+    // 파일 객체를 URL로 변환하여 미리보기 이미지 표시
+    setPreviewImage(URL.createObjectURL(file)); 
+  };
 
   const handleSubmit = () => {
-    onAdd(diaryText, selectedDate);
+    onAdd(diaryText, selectedDate, selectedImage);
     setDiaryText(''); 
     setSelectedDate(''); 
+    setSelectedImage(null);
+    setPreviewImage(null); // 제출 후 이미지 초기화
   };
 
   return (
     <div>
-      {isAdding ? ( // 추가된 부분
+      {isAdding ? (
         <>
           <p>Select Emoji: {selectedEmoji}</p>
           <label>Date:</label>
           <input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
           <textarea value={diaryText} onChange={(e) => setDiaryText(e.target.value)} />
+          <input type="file" onChange={handleFileChange} /> {/* 파일 선택 */}
+          {previewImage && <img src={previewImage} alt="Selected" />} {/* 선택한 이미지 미리보기 */}
           <button onClick={handleSubmit}>Save</button>
         </>
       ) : (
@@ -66,6 +80,7 @@ const DiaryModal = ({ onAdd, onClose, selectedEmoji, selectedText, selectedDate:
           <p>Select Emoji: {selectedEmoji}</p>
           <p>Date: {selectedDate}</p>
           <p>Text: {selectedText}</p>
+          {previewImage && <img src={previewImage} alt="Selected" />} {/* 선택한 이미지 미리보기 */}
         </>
       )}
       <button onClick={onClose}>Close</button>

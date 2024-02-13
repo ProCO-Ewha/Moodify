@@ -5,6 +5,8 @@ import LoginPage from './LoginPage';
 import SignUpPage from './SignUpPage';
 import ResetPassword from './ResetPassword';
 import HomeComponent from './HomeComponent';
+import Setting from './Setting';
+import Findfriends from './Findfriends';
 import './index.css';
 import { UserProvider } from './UserContext';
 
@@ -19,6 +21,8 @@ function App() {
         <Route path="/SignUpPage" element={<SignUpPage />} />
         <Route path="/ResetPassword" element={<ResetPassword />} />
         <Route path="/HomeComponent" element={<HomeComponent />} />
+        <Route path="/Setting" element={<Setting />} />
+        <Route path="/Findfriends" element={<Findfriends />} />
       </Routes>
       </UserProvider>
     </Router>
