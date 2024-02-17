@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,11 +25,15 @@ public class CalendarController {
     private final DiaryService diaryService;
 
     @GetMapping
-    public ResponseEntity<List<DiaryDTO>> showCalendar(@RequestParam int year, @RequestParam int month) {
-        Member currentMember = null; // 로그인된 사용자를 가져오는 로직이 있어야 함
-
-        List<MemberDTO> friends = memberService.getAllFriends(currentMember.getId());
-        List<DiaryDTO> monthly = diaryService.getDiariesByMonth(currentMember.getId(), year, month);
+    public ResponseEntity<CalendarResponse> showCalendar(@RequestParam int year, @RequestParam int month) {
+//        Member currentMember = null; // 로그인된 사용자를 가져오는 로직이 있어야 함
+//        List<MemberDTO> friends = memberService.getAllFriends(currentMember.getId());
+//        List<DiaryDTO> monthly = diaryService.getDiariesByMonth(currentMember.getId(), year, month);
+        List<MemberDTO> friends = memberService.getAllFriends(1L);
+        List<DiaryDTO> monthly = diaryService.getDiariesByMonth(1L, year, month);
+        CalendarResponse response = new CalendarResponse();
+        response.setFriends(friends);
+        response.setMonthly(monthly);
 //        List<Emotion> monthlyEmotion = new ArrayList<>();
 //        for (DiaryDTO diaryDTO : monthly) {
 //            Emotion emotion = diaryDTO.getEmotion();
@@ -36,8 +42,24 @@ public class CalendarController {
 
         return ResponseEntity.ok()
                 .header("Access-Control-Allow-Origin", "*") // CORS 설정
-                .body(monthly);
+                .body(response);
     }
+//    @GetMapping("/redirect-calendar")
+//    public String redirectCalendar() {
+//        LocalDate currentDate = LocalDate.now(); // 현재 날짜 가져오기
+//        int year = currentDate.getYear();
+//        int month = currentDate.getMonthValue();
+//        return "redirect:/calendar?year=" + year + "&month=" + month;
+//    }
+    @GetMapping("/redirect-calendar")
+    public RedirectView redirectCalendar() {
+        LocalDate currentDate = LocalDate.now();
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
+        return new RedirectView("/calendar?year=" + year + "&month=" + month);
+    }
+
+
 
     @GetMapping("/{year}/{month}/{day}")
     public ResponseEntity<Long> viewDiaryByDate(@PathVariable int year, @PathVariable int month, @PathVariable int day) {

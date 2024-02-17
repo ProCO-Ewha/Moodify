@@ -60,7 +60,13 @@ public class DiaryService {
         for (Like like : likes) {
             likers.add(like.getLiker());
         }
-        return likers.get(likers.size()-1).getName();
+        if (likers.size()!=0){
+            return likers.get(likers.size()-1).getName();
+        }
+        else {
+            return null;
+        }
+
     }
     public int getLikeCount(Long diaryId) {
         List<Like> likes = getLikesByDiary(diaryId);

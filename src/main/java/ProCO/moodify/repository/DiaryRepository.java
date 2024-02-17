@@ -25,7 +25,7 @@ public class DiaryRepository {
 
     public List<Diary> findDiariesByIdAndMonth(Long memberId, int year, int month) {
         return em.createQuery(
-                        "SELECT d FROM Diary d WHERE d.author.id = :memberId AND YEAR(d.date) = :year AND MONTH(d.date) = :month",
+                        "SELECT d FROM Diary d WHERE d.authorId = :memberId AND YEAR(d.date) = :year AND MONTH(d.date) = :month",
                         Diary.class)
                 .setParameter("memberId", memberId)
                 .setParameter("year", year)
@@ -35,7 +35,7 @@ public class DiaryRepository {
 
     public Diary findDiariesByIdAndDate(Long memberId, int year, int month, int day) {
         String jpql = "SELECT COUNT(d) FROM Diary d " +
-                "WHERE d.author.id = :memberId " +
+                "WHERE d.authorId = :memberId " +
                 "AND YEAR(d.date) = :year " +
                 "AND MONTH(d.date) = :month " +
                 "AND DAY(d.date) = :day";

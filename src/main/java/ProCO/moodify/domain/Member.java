@@ -16,7 +16,7 @@ public class Member {
     private String email;
     private String name;
     private String pw;
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "authorId")
     private List<Diary> diaries = new ArrayList<>();
     @ManyToMany
     @JoinTable(

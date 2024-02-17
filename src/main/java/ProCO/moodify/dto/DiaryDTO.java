@@ -3,6 +3,7 @@ package ProCO.moodify.dto;
 import ProCO.moodify.domain.AlignStatus;
 import ProCO.moodify.domain.Emotion;
 import ProCO.moodify.domain.PrivacyStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +15,7 @@ public class DiaryDTO {
     private Long authorId;
     private String text;
     private String pic;
+    @JsonIgnore
     private Emotion emotion;
     private PrivacyStatus privacyStatus;
     private AlignStatus alignStatus;

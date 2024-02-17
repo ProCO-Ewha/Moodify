@@ -71,7 +71,7 @@ public class DiaryController {
         likeService.addLike(likerId, diaryId);
         // 좋아요 추가 후 해당 다이어리를 조회하는 URL로 리다이렉트
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .location(URI.create("/" + diaryId))
+                .location(URI.create("/diaries/" + diaryId))
                 .build();
     }
 
@@ -80,7 +80,7 @@ public class DiaryController {
         likeService.cancelLike(likerId, diaryId);
         // 좋아요 삭제 후 해당 다이어리를 조회하는 URL로 리다이렉트
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .location(URI.create("/" + diaryId))
+                .location(URI.create("/diaries/" + diaryId))
                 .build();
     }
 

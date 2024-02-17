@@ -10,11 +10,15 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,6 +76,10 @@ public class MemberService {
         Member member = memberRepository.findOne(memberId);
         MemberDTO memberDTO = mapToDTO(member);
         return memberDTO;
+    }
+    public Optional<Member> findByEmail(String insertedUserEmail) {
+        Member member = memberRepository.findByEmail(insertedUserEmail);
+        return Optional.of(member);
     }
 
     // 회원 검색: email과 name을 기준으로 보여줄 것, JPQL

@@ -10,15 +10,19 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/login")
+@RequestMapping("/login-process")
 public class LogInController {
     private final MemberService memberService;
     @PostMapping
     public ResponseEntity<String> login(@RequestBody Map<String, String> login) {
-        String username = login.get("name");
+        String email = login.get("email");
         String password = login.get("pw");
 
-        Long loginSuccess = memberService.login(username, password);
+        System.out.println(email);
+        System.out.println(password);
+
+
+        Long loginSuccess = memberService.login(email, password);
 
         if (loginSuccess != null) {
             return new ResponseEntity<>("Login successful", HttpStatus.OK);
