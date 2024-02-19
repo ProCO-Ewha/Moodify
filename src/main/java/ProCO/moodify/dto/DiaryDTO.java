@@ -2,6 +2,7 @@ package ProCO.moodify.dto;
 
 import ProCO.moodify.domain.AlignStatus;
 import ProCO.moodify.domain.Emotion;
+import ProCO.moodify.domain.EmotionStatus;
 import ProCO.moodify.domain.PrivacyStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
@@ -14,11 +15,11 @@ public class DiaryDTO {
     private Long id;
     private Long authorId;
     private String text;
-    private String pic;
+    private String pic; //삭제
     @JsonIgnore
-    private Emotion emotion;
+    private EmotionStatus emotion;
     private PrivacyStatus privacyStatus;
-    private AlignStatus alignStatus;
+    private AlignStatus alignStatus; //삭제
     private LocalDateTime date;
     private int likeCnt;
     private String liker;

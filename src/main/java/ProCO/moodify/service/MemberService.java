@@ -1,24 +1,16 @@
 package ProCO.moodify.service;
 
 import ProCO.moodify.domain.Diary;
-import ProCO.moodify.domain.Like;
 import ProCO.moodify.domain.Member;
 import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.repository.MemberRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,22 +36,11 @@ public class MemberService {
 
     //회원 수정
     @Transactional
-    public Long saveMember (Member updatedMember) {
-//        // 수정하려는 회원을 데이터베이스에서 조회
-//        Member existingMember = memberRepository.findOne(updatedMember.getId());
-//
-//        // 조회된 회원이 없으면 예외 발생
-//        if (existingMember == null) {
-//            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
-//        }
-//
-//        // 수정하려는 회원의 정보를 업데이트
-//        existingMember.setName(updatedMember.getName());
-//        existingMember.setEmail(updatedMember.getEmail());
-//        existingMember.setPw(updatedMember.getPw());
-//
-//        memberRepository.save(existingMember);
-//        return existingMember.getId();
+    public Long saveMember (MemberDTO updatedMemberDTO) {
+        Member updatedMember = memberRepository.findOne(updatedMemberDTO.getId());
+        updatedMember.setPw(updatedMemberDTO.getPw());
+        updatedMember.setName(updatedMemberDTO.getName());
+
         memberRepository.save(updatedMember);
         return updatedMember.getId();
     }
@@ -77,11 +58,13 @@ public class MemberService {
         MemberDTO memberDTO = mapToDTO(member);
         return memberDTO;
     }
-    public Optional<Member> findByEmail(String insertedUserEmail) {
+    public MemberDTO findByEmailDTO(String insertedUserEmail) {
         Member member = memberRepository.findByEmail(insertedUserEmail);
-        return Optional.of(member);
+        return mapToDTO(member);
     }
-
+    public Member findByEmail(String insertedUserEmail) {
+        return memberRepository.findByEmail(insertedUserEmail);
+    }
     // 회원 검색: email과 name을 기준으로 보여줄 것, JPQL
 //    public List<Member> searchMember(String keyword) {return memberRepository.search(keyword);}
 
@@ -118,11 +101,16 @@ public class MemberService {
         Member friend = memberRepository.findOne(friendId);
 
         if (member != null && friend != null) {
-
-            member.getFriends().add(friend);
-            friend.getFriends().add(member);
-            memberRepository.save(member);
-            memberRepository.save(friend);
+            if (memberId.equals(friendId)) {
+                throw new IllegalArgumentException("자기 자신을 친구로 추가할 수 없습니다.");
+            }
+            // Check if the friend is already in the member's friend list
+            if (!member.getFriends().contains(friend)) {
+                member.getFriends().add(friend);
+                friend.getFriends().add(member);
+                memberRepository.save(member);
+                memberRepository.save(friend);
+            }
         } else {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
         }

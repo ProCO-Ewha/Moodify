@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+// 로그인 컨트롤러는 Spring Security에서 관리하므로 아예 사용되지 않음
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/login-process")
@@ -20,7 +21,6 @@ public class LogInController {
 
         System.out.println(email);
         System.out.println(password);
-
 
         Long loginSuccess = memberService.login(email, password);
 

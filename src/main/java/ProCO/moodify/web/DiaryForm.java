@@ -1,9 +1,6 @@
 package ProCO.moodify.web;
 
-import ProCO.moodify.domain.AlignStatus;
-import ProCO.moodify.domain.Emotion;
-import ProCO.moodify.domain.Member;
-import ProCO.moodify.domain.PrivacyStatus;
+import ProCO.moodify.domain.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -16,7 +13,7 @@ public class DiaryForm {
     private String txt;
     private String pic;
     @NotNull(message = "감정을 선택하세요")
-    private Emotion emotion;
+    private EmotionStatus emotion;
     private PrivacyStatus privacyStatus;
     private AlignStatus alignStatus;
 }

@@ -1,7 +1,6 @@
 package ProCO.moodify.web;
 
-import ProCO.moodify.domain.Diary;
-import ProCO.moodify.domain.Member;
+import ProCO.moodify.domain.*;
 import ProCO.moodify.dto.DiaryDTO;
 import ProCO.moodify.service.DiaryService;
 import ProCO.moodify.service.LikeService;
@@ -11,11 +10,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+
+import static ProCO.moodify.domain.EmotionStatus.GOOD;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,37 +27,62 @@ public class DiaryController {
     private final DiaryService diaryService;
     private final LikeService likeService;
     private final MemberService memberService;
-
-    // 다이어리 작성: 나중에 폼에 로그인된 회원 들어오는지 확인 필요
-    @PostMapping("/new")
-    public ResponseEntity<Long> write(@Valid @RequestBody DiaryForm form, BindingResult result) {
-        if (result.hasErrors()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        System.out.println(form);
-        Member member = memberService.findOne(form.getAuthorId());
-        System.out.println(member);
-
+//    @PostMapping("/new")
+//    public ResponseEntity<Long> write(@AuthenticationPrincipal User user, @Valid @RequestBody DiaryForm form, BindingResult result) {
+//        if (result.hasErrors()) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//        Long authorId = memberService.findByEmail(user.getUsername()).getId();
+//        // 일기 작성 처리
+//        Diary diary = new Diary();
+//        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
+//        diary.setEmotionStatus(form.getEmotion());
+//        diary.setDate(LocalDateTime.now());
+//        diary.setText(form.getTxt());
+//        diary.setAlignStatus(form.getAlignStatus());
+//        diary.setPrivacyStatus(form.getPrivacyStatus());
+//
+//        Long diaryId = diaryService.write(authorId, diary);
+//
+//        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
+//    }
+//    @PostMapping("/{diaryId}/edit")
+//    public ResponseEntity<Void> editDiary(@PathVariable Long diaryId) {
+//        diaryService.editPrivacy(diaryId);
+//        // 수정이 완료되면 해당 다이어리를 조회하는 URL로 리다이렉트
+//        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+//                .location(URI.create("/" + diaryId))
+//                .build();
+//    }
+    @GetMapping("/new")
+    public ResponseEntity<Long> write(@AuthenticationPrincipal User user) {
         // 작성자의 ID 설정
-        Long authorId = member.getId();
-        System.out.println(authorId);
+        Long authorId = memberService.findByEmail(user.getUsername()).getId();
+
         // 일기 작성 처리
         Diary diary = new Diary();
-        diary.setAuthor(member); // 작성자의 ID와 관계 설정
-        diary.setEmotion(form.getEmotion());
-        diary.setPic(form.getPic());
-        diary.setText(form.getTxt());
+        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
+        diary.setEmotionStatus(EmotionStatus.SURPRISED);
+        diary.setText("form.getTxt()");
         diary.setDate(LocalDateTime.now());
-        diary.setAlignStatus(form.getAlignStatus());
-        diary.setPrivacyStatus(form.getPrivacyStatus());
+        diary.setAlignStatus(AlignStatus.RIGHT);
+        diary.setPrivacyStatus(PrivacyStatus.PRIVATE);
 
         Long diaryId = diaryService.write(authorId, diary);
 
         return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
     }
-    @PostMapping("/{diaryId}/edit")
-    public ResponseEntity<Void> editDiary(@PathVariable Long diaryId) {
-        diaryService.editPrivacy(diaryId);
+    @GetMapping("/{diaryId}/edit")
+    public ResponseEntity<Void> editDiary(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
+        Long authorId = diaryService.getDiaryDetails(diaryId).getAuthorId();
+        Long currentUserId = memberService.findByEmailDTO(user.getUsername()).getId();
+
+        if (authorId==currentUserId){
+            diaryService.editPrivacy(diaryId);
+        }
+        else{
+
+        }
         // 수정이 완료되면 해당 다이어리를 조회하는 URL로 리다이렉트
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
                 .location(URI.create("/" + diaryId))

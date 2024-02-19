@@ -1,6 +1,7 @@
 package ProCO.moodify.config;
 
 import ProCO.moodify.domain.Member;
+import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.service.MemberService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,9 +20,10 @@ public class MyUserDetailsService implements UserDetailsService {
     }
     @Override
     public UserDetails loadUserByUsername(String insertedUserId) throws UsernameNotFoundException {
-        Optional<Member> findOne = memberService.findByEmail(insertedUserId);
-        Member member = findOne.orElseThrow(() -> new UsernameNotFoundException("없는 회원입니다 ㅠ"));
-
+        Member member = memberService.findByEmail(insertedUserId);
+        if (member == null) {
+            throw new UsernameNotFoundException("User not found with email: " + insertedUserId);
+        }
         return User.builder()
                 .username(member.getEmail())
                 .password(member.getPw())

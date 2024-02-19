@@ -18,8 +18,8 @@ public class Diary {
     private String text;
     private String pic;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Emotion emotion;
+    @Enumerated(EnumType.STRING)
+    private EmotionStatus emotionStatus;
     @Enumerated(EnumType.STRING)
     private PrivacyStatus privacyStatus;
     @Enumerated(EnumType.STRING)

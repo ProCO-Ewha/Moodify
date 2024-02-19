@@ -10,6 +10,8 @@ import ProCO.moodify.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -25,7 +27,7 @@ public class CalendarController {
     private final DiaryService diaryService;
 
     @GetMapping
-    public ResponseEntity<CalendarResponse> showCalendar(@RequestParam int year, @RequestParam int month) {
+    public ResponseEntity<CalendarResponse> showCalendar(@AuthenticationPrincipal User user, @RequestParam int year, @RequestParam int month) {
 //        Member currentMember = null; // 로그인된 사용자를 가져오는 로직이 있어야 함
 //        List<MemberDTO> friends = memberService.getAllFriends(currentMember.getId());
 //        List<DiaryDTO> monthly = diaryService.getDiariesByMonth(currentMember.getId(), year, month);

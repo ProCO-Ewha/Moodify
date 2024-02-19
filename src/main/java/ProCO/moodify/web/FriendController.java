@@ -5,6 +5,8 @@ import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -34,20 +36,22 @@ public class FriendController {
 //    }
     // 친구 추가: 현재 접속한 사람 + 친구 dto 가져와서 id 퍼오는 로직 필요
     @PostMapping("/add")
-    public ResponseEntity<String> addFriend(@RequestBody Map<String, Long> add) {
-        Long currentUserId = add.get("currentUserId");
-        Long friendId = add.get("friendId");
-        memberService.addFriend(currentUserId, friendId);
+    public ResponseEntity<String> addFriend(@AuthenticationPrincipal User user, @RequestBody Long addId) {
+        String currentUserEmail = user.getUsername();
+        Long currentUserId = memberService.findByEmail(currentUserEmail).getId();
+
+        memberService.addFriend(currentUserId, addId);
         String message = "친구 추가가 성공적으로 처리되었습니다.";
         return ResponseEntity.ok().body(message);
     }
 
     // 친구 삭제
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteFriend(@RequestBody Map<String, Long> delete) {
-        Long currentUserId = delete.get("currentUserId");
-        Long friendId = delete.get("friendId");
-        memberService.deleteFriend(currentUserId, friendId);
+    public ResponseEntity<String> deleteFriend(@AuthenticationPrincipal User user, @RequestBody Long deleteId) {
+        String currentUserEmail = user.getUsername();
+        Long currentUserId = memberService.findByEmail(currentUserEmail).getId();
+
+        memberService.deleteFriend(currentUserId, deleteId);
         String message = "친구 삭제가 성공적으로 처리되었습니다.";
         return ResponseEntity.ok().body(message);
     }

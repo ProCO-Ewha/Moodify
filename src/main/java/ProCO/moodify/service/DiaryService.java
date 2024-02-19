@@ -96,7 +96,7 @@ public class DiaryService {
         diaryDTO.setAuthorId(diary.getAuthorId());
         diaryDTO.setText(diary.getText());
         diaryDTO.setPic(diary.getPic());
-        diaryDTO.setEmotion(diary.getEmotion());
+        diaryDTO.setEmotion(diary.getEmotionStatus());
         diaryDTO.setPrivacyStatus(diary.getPrivacyStatus());
         diaryDTO.setAlignStatus(diary.getAlignStatus());
         diaryDTO.setDate(diary.getDate());
