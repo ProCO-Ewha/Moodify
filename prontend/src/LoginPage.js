@@ -5,14 +5,12 @@ import HomeComponent from './HomeComponent';
 import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton';
 import  { useState } from 'react';
-import { useUser } from './UserContext';
+import axios from 'axios';
 
-  const LoginPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
-    const { login } = useUser();
-    const navigate = useNavigate();
+const LoginPage = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const navigateToSignUpPage = () => {
     navigate('/SignUpPage');
@@ -30,23 +28,24 @@ import { useUser } from './UserContext';
     setPassword(e.target.value);
   };
 
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-
   const handleLogin = async () => {
     try {
-      // 가상의 사용자 정보
-      const fakeUserData = {
-        id: 123,
-        email: 'test@example.com',
-        // ... 기타 사용자 정보 ...
-      };
-
-      // 가상의 로그인 성공
-      login(fakeUserData);
-
+      const response = await axios.post('http://localhost:8080/login', {
+        email,
+        password,
+      });
+  
+      if (response.status !== 200) {
+        throw new Error('Invalid email or password');
+      }
+  
+      // 서버에서 받아온 사용자 정보
+      const userData = response.data;
+  
+      // 로그인 성공 시 사용자 정보를 설정
+      // 이 부분은 추후 사용자 정보를 사용하는 방식에 따라 수정이 필요합니다.
+      localStorage.setItem('user', JSON.stringify(userData));
+  
       // 메인 달력 페이지로 이동
       navigate('/HomeComponent');
     } catch (error) {
@@ -54,35 +53,6 @@ import { useUser } from './UserContext';
       alert(error.message);
     }
   };
-
-  /*const handleLogin = async () => {
-    try {
-      // 서버에 로그인 요청을 보냄
-      const response = await fetch('서버의 로그인 API 주소', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Invalid email or password');
-      }
-
-      // 서버에서 받아온 사용자 정보
-      const userData = await response.json();
-
-      // 로그인 성공 시 사용자 정보를 설정
-      login(userData);
-
-      // 메인 달력 페이지로 이동
-      navigate('/HomeComponent');
-    } catch (error) {
-      // 로그인 실패 시 처리
-      alert(error.message);
-    }
-  };*/
 
   return (
     <div className='login'>

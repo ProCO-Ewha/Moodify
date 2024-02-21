@@ -1,7 +1,7 @@
 // FriendsList.js
 import React from 'react';
 
-const FriendsList = ({ friends, onSelect }) => {
+const FriendsList = ({ friends, onFriendClick }) => {
   const containerStyle = {
     display: 'flex',
     overflowX: 'scroll',
@@ -17,7 +17,7 @@ const FriendsList = ({ friends, onSelect }) => {
   return (
     <div style={containerStyle}>
       {friends.map((friend) => (
-        <div key={friend.id} style={itemStyle} onClick={() => onSelect(friend.id)}>
+        <div key={friend.id} onClick={() => onFriendClick(friend.id)}>
           {friend.nickname}
         </div>
       ))}

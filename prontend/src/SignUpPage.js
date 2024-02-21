@@ -61,7 +61,7 @@ import BackButton from './BackButton';
 
 function SignUpPage() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [pw, setPassword] = useState('');
   const [name, setName] = useState('');
 
   const handleEmailChange = (e) => {
@@ -76,12 +76,32 @@ function SignUpPage() {
     setName(e.target.value);
   };
 
-  const handleSignUp = () => {
-    // 여기에서 회원 가입 로직을 추가할 수 있습니다.
-    // 필요에 따라 서버에 요청을 보내거나 다른 작업을 수행할 수 있습니다.
-    // 이 예제에서는 간단하게 alert를 통해 입력된 정보를 보여줍니다.
-    alert(`Email: ${email}, Password: ${password}, Name: ${name}`);
+  const handleSignUp = async () => {
+    try {
+      // 로컬에서 실행 중인 백엔드 서버로 회원가입 요청을 보냄
+      const response = await fetch('http://localhost:8080/members/new', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, pw, name }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Sign up failed');
+      }
+  
+      // 서버에서 받아온 메시지
+      const message = await response.text();
+  
+      // 회원가입 성공시 메시지를 보여줌
+      alert(message);
+    } catch (error) {
+      // 회원가입 실패 시 처리
+      alert(error.message);
+    }
   };
+  
 
   return (
     <div>
@@ -103,7 +123,7 @@ function SignUpPage() {
       <div className='input-button-group'>
         <input
           type='password'
-          value={password}
+          value={pw}
           onChange={handlePasswordChange}
           className='input-button-group'
           placeholder='Password'

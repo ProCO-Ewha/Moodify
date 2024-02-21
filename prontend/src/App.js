@@ -7,6 +7,8 @@ import ResetPassword from './ResetPassword';
 import HomeComponent from './HomeComponent';
 import Setting from './Setting';
 import Findfriends from './Findfriends';
+import FriendCalendarPage from './FriendCalendarPage';
+import FriendDiaryPage from './FriendDiaryPage';
 import './index.css';
 import { UserProvider } from './UserContext';
 
@@ -23,6 +25,9 @@ function App() {
         <Route path="/HomeComponent" element={<HomeComponent />} />
         <Route path="/Setting" element={<Setting />} />
         <Route path="/Findfriends" element={<Findfriends />} />
+        <Route path="/my-calendar/:yearMonth" element={<HomeComponent />} />
+        <Route path="/friend-calendar/:friendId/:yearMonth" element={<FriendCalendarPage />} />
+        <Route path="/friend-diary/:diaryId" element={<FriendDiaryPage />} />
       </Routes>
       </UserProvider>
     </Router>

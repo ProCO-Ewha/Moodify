@@ -219,7 +219,6 @@ import axios from 'axios';
 import CalendarModal from './CalendarModal';
 import EmojiModal from './EmojiModal';
 import DiaryModal from './DiaryModal';
-import AddDiaryModal from './AddDiaryModal'; // 추가된 부분
 import ViewDiaryModal from './ViewDiaryModal'; 
 import FriendsList from './FriendsList'; // 추가된 부분
 import FriendDiaryList from './FriendDiaryList'; 
@@ -239,8 +238,6 @@ const [selectedDiary, setSelectedDiary] = useState(null);
 const [addDiaryModalShown, setAddDiaryModalShown] = useState(false);
 const [isAdding, setIsAdding] = useState(false);
 const [isModalOpen, setModalOpen] = useState(false);
-const [selectedImage, setSelectedImage] = useState(null);
-//const [friends, setFriends] = useState([]); // 친구 목록을 저장하는 상태
 const [selectedFriendId, setSelectedFriendId] = useState(null); 
 const [diaries, setDiaries] = useState([]);
 const navigate = useNavigate();
@@ -290,10 +287,10 @@ useEffect(() => {
   }
 }, [selectedFriendId]);*/
 
-const handleAddDiary = (diaryText, selectedDate, selectedImage) => {
-  const newEntry = { date: selectedDate, emoji: selectedEmoji, text: diaryText, image: selectedImage instanceof File ? URL.createObjectURL(selectedImage) : null};
-  
-  /*axios.post('/api/diaryEntries', newEntry)
+const handleAddDiary = (diaryText, selectedDate) => {
+  const newEntry = { date: selectedDate, emoji: selectedEmoji, text: diaryText};
+
+ /* axios.post('/api/diaryEntries', newEntry)
     .then(response => {
       if (response.status === 200) {
         setDiaryEntries([
@@ -304,39 +301,6 @@ const handleAddDiary = (diaryText, selectedDate, selectedImage) => {
         setDiaryModalShown(false);
       }
     });*/
-  
-  // 가상의 응답을 생성
-  setDiaryEntries([
-    ...diaryEntries,
-    newEntry
-  ]);
-  setSelectedEmoji('');
-  setDiaryModalShown(false);
-  setSelectedYearMonth(selectedDate.slice(0, 7));
-  setSelectedImage(null);
-};
-
-const handleEditDiary = (diaryText, selectedDate, index) => {
-const editedEntry = { date: selectedDate, emoji: selectedEmoji, text: diaryText };
-axios.put(`api/diaryEntries/${index}`, editedEntry)
-.then(response => {
-if (response.status === 200) {
-const newDiaryEntries = [...diaryEntries];
-newDiaryEntries[index] = editedEntry;
-setDiaryEntries(newDiaryEntries);
-}
-});
-};
-
-const handleDeleteDiary = (index) => {
-axios.delete(`api/diaryEntries/${index}`)
-.then(response => {
-if (response.status === 200) {
-const newDiaryEntries = [...diaryEntries];
-newDiaryEntries.splice(index, 1);
-setDiaryEntries(newDiaryEntries);
-}
-});
 };
 
 const handleYearMonthClick = () => {
@@ -399,17 +363,44 @@ const handleOpenFindfriendsPage = () =>{
 
 const handleLike = (id) => {
   // 좋아요 기능을 처리하는 함수
-  // 백엔드 서버에 좋아요 상태를 변경하는 요청을 보내야 합니다.
-  // 이 예제에서는 가상의 기능을 구현하기 위해 상태만 변경합니다.
-  setDiaries(diaries.map(diary => diary.id === id ? { ...diary, isLiked: !diary.isLiked } : diary));
+  axios.post(`/api/diaries/${id}/like`)
+    .then(response => {
+      if (response.status === 200) {
+        setDiaries(diaries.map(diary => diary.id === id ? { ...diary, isLiked: !diary.isLiked } : diary));
+      }
+    });
+};
+
+/*const handleFriendClick = async (friendId) => {
+  // 백엔드에 친구의 최신 달력 정보를 요청
+  const response = await axios.get(`/api/friends/${friendId}/latest-calendar`);
+  const { year, month } = response.data;
+  // 받은 정보로 해당 친구의 달력 페이지로 이동
+  navigate(`/friend-calendar/${friendId}/${year}-${month}`);
+};*/
+
+const handleFriendClick = (friendId) => {
+  // 가상의 년도와 월을 사용하여 해당 친구의 달력 페이지로 이동
+  const year = '2024';
+  const month = '02';
+  navigate(`/friend-calendar/${friendId}/${year}-${month}`);
 };
 
 return (
   <div>
-    <FriendsList friends={friends} onSelect={setSelectedFriendId} />
-      {selectedFriendId && <FriendDiaryList diaries={diaries} onLike={handleLike} />}
-      <h2>{selectedYearMonth}</h2> {/* 선택한 년도와 월 표시 */}
-      <button onClick={() => setCalendarModalShown(true)} className="button-select-year">Select Year and Month</button>
+     <div className="button-container">
+    <button onClick={() => setCalendarModalShown(!calendarModalShown)} className="button-select-year">Select Year and Month</button>
+     </div>
+     {calendarModalShown && (
+        <CalendarModal
+          onSelect={handleSelectDate}
+          onClose={() => setCalendarModalShown(false)}
+        />
+     )}
+     <div className="header-container">
+    <h2>{selectedYearMonth}</h2> {/* 선택한 년도와 월 표시 */}
+    </div>
+    <FriendsList friends={friends} onFriendClick={handleFriendClick} />
       <button onClick={handleOpenEmojiModal} className="button-add-emoji">+</button>
       <button onClick={handleOpenSettingPage} className="button-settings">
         <img src="/images/setting.png"/>
@@ -417,16 +408,8 @@ return (
       <button onClick={handleOpenFindfriendsPage} className="button-find-friends">
         <img src="/images/user.png"/>
       </button>
+
       
-
-
-  {calendarModalShown && (
-    <CalendarModal
-      onSelect={handleSelectDate}
-      onClose={() => setCalendarModalShown(false)}
-    />
-  )}
-
 {emojiModalShown && (
   <EmojiModal
     onSelect={handleOpenAddDiaryModal} // 변경된 부분
@@ -435,12 +418,13 @@ return (
 )}
 
 {addDiaryModalShown && (
-  <AddDiaryModal
+  <DiaryModal
     onAdd={handleAddDiary}
     onClose={() => setAddDiaryModalShown(false)}
     selectedEmoji={selectedEmoji}
-    selectedImage={selectedImage} // 추가된 부분
-    setSelectedImage={setSelectedImage} // 추가된 부분
+    //selectedImage={selectedImage} // 추가된 부분
+    //setSelectedImage={setSelectedImage} // 추가된 부분
+    isAdding={true}
   />
 )}
 
@@ -449,11 +433,10 @@ return (
   <ViewDiaryModal
     onClose={handleCloseDiaryModal}
     selectedDiary={selectedDiary}
-    selectedImage={selectedImage} // 추가된 부분
+    //selectedImage={selectedImage} // 추가된 부분
   />
 )}
 
-{selectedDiary?.image && <img src={selectedDiary.image} alt="Diary" />}
 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)' }}>
   {sortedDiaryEntries.map((entry, index) => (
     <div key={index} onClick={() => handleOpenDiaryModal(index)}>

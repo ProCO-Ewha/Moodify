@@ -20,12 +20,12 @@ export const UserProvider = ({ children }) => {
   };
   
 
-  const logout = () => {
+  /*const logout = () => {
     setUser({
       username: '',
       calendarData: [],
     });
-  };
+  };*/
 
   const addDiaryEntry = (date, emoticon, diary) => {
     const newEntry = { date, emoticon, diary };
@@ -36,7 +36,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, addDiaryEntry }}>
+    <UserContext.Provider value={{ user, login, addDiaryEntry }}>
       {children}
     </UserContext.Provider>
   );
