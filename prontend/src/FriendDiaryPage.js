@@ -53,7 +53,7 @@ const FriendDiaryPage = () => {
   const [selectedYearMonth, setSelectedYearMonth] = useState('2024-02');
   const [calendarModalShown, setCalendarModalShown] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  //const location = useLocation();
 
   useEffect(() => {
     const fetchDiaries = async () => {
@@ -75,6 +75,11 @@ const FriendDiaryPage = () => {
     setDiary(selectedDiary);
   }, [diaries, diaryId]); // diaries와 diaryId가 변경될 때마다 실행됩니다.
 
+  const handleClose = () => {
+    const diaryYearMonth = diary.date.slice(0,7); // 일기의 년-월을 가져옵니다.
+    navigate(`/friend-calendar/${friendId}/${diaryYearMonth}`); // 해당 년-월의 달력 페이지로 이동합니다.
+  };
+
 
   const handleSelectDate = (year, month) => {
     setSelectedYearMonth(`${year}-${month}`);
@@ -95,7 +100,7 @@ const FriendDiaryPage = () => {
 
   return (
     <div>
-      <h2>{selectedYearMonth}</h2>
+      <h2 style={{ marginTop: '20px' }}>{selectedYearMonth}</h2>
       <button onClick={() => setCalendarModalShown(!calendarModalShown)} className="button-select-year">Select Year and Month</button>
       {calendarModalShown && (
         <CalendarModal
@@ -112,6 +117,7 @@ const FriendDiaryPage = () => {
             <button onClick={() => handleLike(diary.id)}>
               {likes[diary.id] ? 'Unlike' : 'Like'}
             </button>
+            <button onClick={handleClose}>Close</button>
           </div>
         )
       }
@@ -120,4 +126,3 @@ const FriendDiaryPage = () => {
 };
 
 export default FriendDiaryPage;
-

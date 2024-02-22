@@ -1,0 +1,19 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px; /* 그리드 간격 조절을 위해 추가 */
+}
+
+.container > div {
+  cursor: pointer;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+}
+
+.container > div:hover {
+  background-color: #e0e0e0;
+}
+

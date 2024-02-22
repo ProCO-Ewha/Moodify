@@ -34,7 +34,7 @@ function App() {
   );
 }
 
-function Home() {
+/*function Home() {
   const navigate = useNavigate();
 
   const navigateToLoginPage = () => {
@@ -48,6 +48,24 @@ function Home() {
       </div>
       <div className="black-button-group">
         <button onClick={navigateToLoginPage}>START</button>
+      </div>
+      <div>
+        <img src="/images/moodifymainpic.png" alt="메인화면사진" className="main-image" />
+      </div>
+    </div>
+  );
+}*/
+
+function Home() {
+  return (
+    <div className="App">
+      <div className="centered-title">
+        <p id="logo-text">moodify</p>
+      </div>
+      <div className="black-button-group">
+        <a href="http://localhost:8080/login">
+          <button>START</button>
+        </a>
       </div>
       <div>
         <img src="/images/moodifymainpic.png" alt="메인화면사진" className="main-image" />
