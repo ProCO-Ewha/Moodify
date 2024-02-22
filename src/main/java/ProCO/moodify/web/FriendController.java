@@ -13,28 +13,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/friends")
 @RequiredArgsConstructor
 public class FriendController {
     private final MemberService memberService;
-
-    // 회원 검색
     @GetMapping("/search")
     public ResponseEntity<List<MemberDTO>> searchMembers(@RequestParam String keyword) {
         List<MemberDTO> searchResults = memberService.searchMember(keyword);
         return ResponseEntity.ok(searchResults);
     }
-
-//    // 친구 추가
-//    @PostMapping("/add")
-//    public ResponseEntity<String> addFriend(@RequestParam Long currentUserId, @RequestParam Long friendId) {
-//        memberService.addFriend(currentUserId, friendId);
-//        String message = "친구 추가가 성공적으로 처리되었습니다.";
-//        return ResponseEntity.ok().body(message);
-//    }
-    // 친구 추가: 현재 접속한 사람 + 친구 dto 가져와서 id 퍼오는 로직 필요
     @PostMapping("/add")
     public ResponseEntity<String> addFriend(@AuthenticationPrincipal User user, @RequestBody Long addId) {
         String currentUserEmail = user.getUsername();
@@ -44,8 +33,6 @@ public class FriendController {
         String message = "친구 추가가 성공적으로 처리되었습니다.";
         return ResponseEntity.ok().body(message);
     }
-
-    // 친구 삭제
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteFriend(@AuthenticationPrincipal User user, @RequestBody Long deleteId) {
         String currentUserEmail = user.getUsername();

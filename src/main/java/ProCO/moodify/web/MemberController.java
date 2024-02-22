@@ -17,12 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/members")
 public class MemberController {
     private final MemberService memberService;
-
     public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
@@ -80,7 +79,7 @@ public class MemberController {
 //        memberService.saveMember(member);
 //        return new ResponseEntity<>("Member updated successfully", HttpStatus.OK);
 //    }
-    @PostMapping("/edit")
+    @PutMapping("/edit")
     public ResponseEntity<String> updateCurrentUser(@AuthenticationPrincipal User user,  @RequestBody MemberForm form) {
         String loggedInUserEmail = user.getUsername();
         MemberDTO memberDTO = memberService.findByEmailDTO(loggedInUserEmail);
@@ -94,7 +93,7 @@ public class MemberController {
         memberService.saveMember(memberDTO);
         return new ResponseEntity<>("Member updated successfully", HttpStatus.OK);
     }
-
+//이거는 확인차 넣었음! 회원 수정할때는 edit 메소드만 쓰면 됨
     @GetMapping("/me")
     public ResponseEntity<MemberDTO> getCurrentUser(@AuthenticationPrincipal User user) {
         String loggedInUserId = user.getUsername();

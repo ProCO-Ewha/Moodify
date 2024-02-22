@@ -141,6 +141,18 @@ public class MemberService {
         }
         return memberDTOList;
     }
+    public boolean areFriends(Long id1, Long id2) {
+        // id1과 id2가 서로의 친구 목록에 포함되어 있는지 확인
+        MemberDTO member1 = mapToDTO(memberRepository.findOne(id1));
+        MemberDTO member2 = mapToDTO(memberRepository.findOne(id2));
+
+        // 만약 둘 중 하나라도 null이면 친구가 아님
+        if (member1 == null || member2 == null) {
+            return false;
+        }
+        // member1의 친구 목록에 member2의 id가 있거나 member2의 친구 목록에 member1의 id가 있으면 서로 친구임을 의미함
+        return member1.getFriendIds().contains(id2) || member2.getFriendIds().contains(id1);
+    }
 
     private MemberDTO mapToDTO(Member member) {
         MemberDTO dto = new MemberDTO();

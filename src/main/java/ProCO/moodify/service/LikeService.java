@@ -26,7 +26,10 @@ public class LikeService {
     public Long addLike(Long likerId, Long diaryId) {
         Member liker = memberRepository.findOne(likerId);
         Diary diary = diaryRepository.findOne(diaryId);
-
+        // 좋아요를 이미 한 경우 예외 발생
+        if (likeRepository.existsByLikerAndDiary(liker, diary)) {
+            throw new IllegalArgumentException("이미 좋아요를 한 다이어리입니다.");
+        }
         if (liker != null && diary != null) {
             Like like = Like.createLike(liker, diary);
             likeRepository.save(like);

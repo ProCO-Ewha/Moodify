@@ -3,6 +3,7 @@ package ProCO.moodify.web;
 import ProCO.moodify.domain.Diary;
 import ProCO.moodify.domain.Emotion;
 import ProCO.moodify.domain.Member;
+import ProCO.moodify.domain.PrivacyStatus;
 import ProCO.moodify.dto.DiaryDTO;
 import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.service.DiaryService;
@@ -18,58 +19,56 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/calendar")
 @RequiredArgsConstructor
 public class CalendarController {
     private final MemberService memberService;
     private final DiaryService diaryService;
-
-    @GetMapping
-    public ResponseEntity<CalendarResponse> showCalendar(@AuthenticationPrincipal User user, @RequestParam int year, @RequestParam int month) {
-//        Member currentMember = null; // 로그인된 사용자를 가져오는 로직이 있어야 함
-//        List<MemberDTO> friends = memberService.getAllFriends(currentMember.getId());
-//        List<DiaryDTO> monthly = diaryService.getDiariesByMonth(currentMember.getId(), year, month);
-        List<MemberDTO> friends = memberService.getAllFriends(1L);
-        List<DiaryDTO> monthly = diaryService.getDiariesByMonth(1L, year, month);
+    @GetMapping("/{username}")
+    public ResponseEntity<CalendarResponse> showCalendar(@AuthenticationPrincipal User user, @RequestParam int year, @RequestParam int month, @PathVariable String username) {
+        // 친구 목록은 현재 사용자의 친구, 달력은 주소를 따름
+        MemberDTO currentMember = memberService.findByEmailDTO(user.getUsername());
+        List<MemberDTO> friends = memberService.getAllFriends(currentMember.getId());
+        MemberDTO urlMember = memberService.findByEmailDTO(username);
         CalendarResponse response = new CalendarResponse();
         response.setFriends(friends);
-        response.setMonthly(monthly);
-//        List<Emotion> monthlyEmotion = new ArrayList<>();
-//        for (DiaryDTO diaryDTO : monthly) {
-//            Emotion emotion = diaryDTO.getEmotion();
-//            monthlyEmotion.add(emotion);
-//        }
-
+        // 현재 사용자와 URL에 작성된 사용자가 동일하거나 서로 친구인지 확인
+        if (currentMember.getId().equals(urlMember.getId()) || memberService.areFriends(currentMember.getId(), urlMember.getId())) {
+            List<DiaryDTO> monthly = diaryService.getDiariesByMonth(urlMember.getId(), currentMember.getId(), year, month);
+            response.setMonthly(monthly);
+        }
         return ResponseEntity.ok()
-                .header("Access-Control-Allow-Origin", "*") // CORS 설정
+                .header("Access-Control-Allow-Origin", "*")
                 .body(response);
     }
-//    @GetMapping("/redirect-calendar")
-//    public String redirectCalendar() {
-//        LocalDate currentDate = LocalDate.now(); // 현재 날짜 가져오기
-//        int year = currentDate.getYear();
-//        int month = currentDate.getMonthValue();
-//        return "redirect:/calendar?year=" + year + "&month=" + month;
-//    }
     @GetMapping("/redirect-calendar")
-    public RedirectView redirectCalendar() {
+    public RedirectView redirectCalendar(@AuthenticationPrincipal User user) {
+        String username = user.getUsername();
         LocalDate currentDate = LocalDate.now();
         int year = currentDate.getYear();
         int month = currentDate.getMonthValue();
-        return new RedirectView("/calendar?year=" + year + "&month=" + month);
+        String redirectUrl = String.format("/calendar/%s?year=%d&month=%d", username, year, month);
+        return new RedirectView(redirectUrl);
     }
-
-
-
-    @GetMapping("/{year}/{month}/{day}")
-    public ResponseEntity<Long> viewDiaryByDate(@PathVariable int year, @PathVariable int month, @PathVariable int day) {
-        Member currentMember = null; // 로그인된 사용자를 가져오는 로직이 있어야 함
-        Long diaryId = diaryService.getDiaryIdByDate(currentMember.getId(), year, month, day).getId();
+    @GetMapping("/{username}/{year}/{month}/{day}")
+    public ResponseEntity<Long> viewDiaryByDate(@AuthenticationPrincipal User user, @PathVariable String username, @PathVariable int year, @PathVariable int month, @PathVariable int day) {
+        Long currentMemberId = memberService.findByEmailDTO(user.getUsername()).getId();
+        Long diaryId = diaryService.getDiaryIdByDate(currentMemberId, year, month, day).getId();
         return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "/diaries/" + diaryId + "/view") // 해당 다이어리로 리다이렉트
-                .header("Access-Control-Allow-Origin", "*") // CORS 설정
-                .body(diaryId);
+                    .header("Location", "/diaries/" + diaryId) // 해당 다이어리로 리다이렉트
+                    .header("Access-Control-Allow-Origin", "*") // CORS 설정
+                    .body(diaryId);
+//        DiaryDTO diaryDTO = diaryService.getDiaryDetails(diaryId);
+//        if (diaryDTO.getPrivacyStatus() == PrivacyStatus.PUBLIC){
+//            return ResponseEntity.status(HttpStatus.FOUND)
+//                    .header("Location", "/diaries/" + diaryId) // 해당 다이어리로 리다이렉트
+//                    .header("Access-Control-Allow-Origin", "*") // CORS 설정
+//                    .body(diaryId);
+//        }
+//        else{
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+//        }
     }
 }

@@ -2,6 +2,7 @@ package ProCO.moodify.web;
 
 import ProCO.moodify.domain.*;
 import ProCO.moodify.dto.DiaryDTO;
+import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.service.DiaryService;
 import ProCO.moodify.service.LikeService;
 import ProCO.moodify.service.MemberService;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 
 import static ProCO.moodify.domain.EmotionStatus.GOOD;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/diaries")
@@ -27,87 +29,74 @@ public class DiaryController {
     private final DiaryService diaryService;
     private final LikeService likeService;
     private final MemberService memberService;
-//    @PostMapping("/new")
-//    public ResponseEntity<Long> write(@AuthenticationPrincipal User user, @Valid @RequestBody DiaryForm form, BindingResult result) {
-//        if (result.hasErrors()) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
+    @PostMapping("/new")
+    public ResponseEntity<Long> write(@AuthenticationPrincipal User user, @Valid @RequestBody DiaryForm form, BindingResult result) {
+        Long authorId = memberService.findByEmail(user.getUsername()).getId();
+        if (result.hasErrors()) { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+        // 일기 작성 처리
+        Diary diary = new Diary();
+        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
+        diary.setEmotionStatus(form.getEmotion());
+        diary.setText(form.getTxt());
+        diary.setDate(LocalDateTime.now());
+        diary.setAlignStatus(form.getAlignStatus());
+        diary.setPrivacyStatus(form.getPrivacyStatus());
+
+        Long diaryId = diaryService.write(authorId, diary);
+        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
+    }
+    //실행시킬때마다 일기 작성하기 귀찮으면 위에 post 메소드 각주처리하고 아래 활성화 해서 실행하세요 (url에만 접속해도 일기 작성됨)
+//    @GetMapping("/new")
+//    public ResponseEntity<Long> write(@AuthenticationPrincipal User user) {
 //        Long authorId = memberService.findByEmail(user.getUsername()).getId();
 //        // 일기 작성 처리
 //        Diary diary = new Diary();
 //        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
-//        diary.setEmotionStatus(form.getEmotion());
+//        diary.setEmotionStatus(EmotionStatus.SURPRISED);
+//        diary.setText("form.getTxt()");
 //        diary.setDate(LocalDateTime.now());
-//        diary.setText(form.getTxt());
-//        diary.setAlignStatus(form.getAlignStatus());
-//        diary.setPrivacyStatus(form.getPrivacyStatus());
+//        diary.setAlignStatus(AlignStatus.RIGHT);
+//        diary.setPrivacyStatus(PrivacyStatus.PRIVATE);
 //
 //        Long diaryId = diaryService.write(authorId, diary);
-//
 //        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
 //    }
-//    @PostMapping("/{diaryId}/edit")
-//    public ResponseEntity<Void> editDiary(@PathVariable Long diaryId) {
-//        diaryService.editPrivacy(diaryId);
-//        // 수정이 완료되면 해당 다이어리를 조회하는 URL로 리다이렉트
-//        return ResponseEntity.status(HttpStatus.SEE_OTHER)
-//                .location(URI.create("/" + diaryId))
-//                .build();
-//    }
-    @GetMapping("/new")
-    public ResponseEntity<Long> write(@AuthenticationPrincipal User user) {
-        // 작성자의 ID 설정
-        Long authorId = memberService.findByEmail(user.getUsername()).getId();
 
-        // 일기 작성 처리
-        Diary diary = new Diary();
-        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
-        diary.setEmotionStatus(EmotionStatus.SURPRISED);
-        diary.setText("form.getTxt()");
-        diary.setDate(LocalDateTime.now());
-        diary.setAlignStatus(AlignStatus.RIGHT);
-        diary.setPrivacyStatus(PrivacyStatus.PRIVATE);
-
-        Long diaryId = diaryService.write(authorId, diary);
-
-        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
-    }
-    @GetMapping("/{diaryId}/edit")
+    @PostMapping("/{diaryId}/edit")
     public ResponseEntity<Void> editDiary(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
         Long authorId = diaryService.getDiaryDetails(diaryId).getAuthorId();
         Long currentUserId = memberService.findByEmailDTO(user.getUsername()).getId();
-
-        if (authorId==currentUserId){
-            diaryService.editPrivacy(diaryId);
-        }
-        else{
-
-        }
-        // 수정이 완료되면 해당 다이어리를 조회하는 URL로 리다이렉트
-        return ResponseEntity.status(HttpStatus.SEE_OTHER)
-                .location(URI.create("/" + diaryId))
-                .build();
-    }
-    @GetMapping("/{diaryId}")
-    public ResponseEntity<DiaryDTO> viewDiary(@PathVariable Long diaryId) {
-        DiaryDTO diaryDTO = diaryService.getDiaryDetails(diaryId);
-        return new ResponseEntity<>(diaryDTO, HttpStatus.OK);
-    }
-
-    @PostMapping("/{diaryId}/like/add")
-    public ResponseEntity<Void> addLike(@PathVariable Long diaryId, @RequestParam Long likerId) {
-        likeService.addLike(likerId, diaryId);
-        // 좋아요 추가 후 해당 다이어리를 조회하는 URL로 리다이렉트
+        if (authorId==currentUserId){ diaryService.editPrivacy(diaryId);}
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
                 .location(URI.create("/diaries/" + diaryId))
                 .build();
     }
-
-    @PostMapping("/{diaryId}/like/remove")
-    public ResponseEntity<Void> deleteLike(@PathVariable Long diaryId, @RequestParam  Long likerId) {
-        likeService.cancelLike(likerId, diaryId);
-        // 좋아요 삭제 후 해당 다이어리를 조회하는 URL로 리다이렉트
+    @GetMapping("/{diaryId}")
+    public ResponseEntity<DiaryDTO> viewDiary(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
+        DiaryDTO diaryDTO = diaryService.getDiaryDetails(diaryId);
+        MemberDTO memberDTO = memberService.findByEmailDTO(user.getUsername());
+        if (diaryService.checkDiaryAccess( memberDTO, diaryDTO)) {
+            return new ResponseEntity<>(diaryDTO, HttpStatus.OK);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+    @PostMapping("/{diaryId}/like/add")
+    public ResponseEntity<Void> addLike(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
+        Long likerId = memberService.findByEmailDTO(user.getUsername()).getId();
+        if (diaryService.checkDiaryAccess(memberService.findOneDTO(likerId), diaryService.getDiaryDetails(diaryId))) {
+            likeService.addLike(likerId, diaryId);
+        }
         return ResponseEntity.status(HttpStatus.SEE_OTHER)
+                .location(URI.create("/diaries/" + diaryId))
+                .build();
+    }
+    @PostMapping("/{diaryId}/like/remove")
+    public ResponseEntity<Void> deleteLike(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
+        Long likerId = memberService.findByEmailDTO(user.getUsername()).getId();
+        if (diaryService.checkDiaryAccess(memberService.findOneDTO(likerId), diaryService.getDiaryDetails(diaryId))) {
+            likeService.cancelLike(likerId, diaryId);
+        }        return ResponseEntity.status(HttpStatus.SEE_OTHER)
                 .location(URI.create("/diaries/" + diaryId))
                 .build();
     }

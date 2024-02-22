@@ -5,10 +5,13 @@ import ProCO.moodify.dto.DiaryDTO;
 import ProCO.moodify.dto.MemberDTO;
 import ProCO.moodify.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -18,6 +21,7 @@ public class DiaryService {
     private final MemberRepository memberRepository;
     private final DiaryRepository diaryRepository;
     private final LikeRepository likeRepository;
+    private final MemberService memberService;
 
     // 일기 작성
     @Transactional
@@ -28,10 +32,13 @@ public class DiaryService {
         return diary.getId();
     }
     // 일기 수정
+    @Transactional
     public void editPrivacy (Long diaryId) {
+        System.out.println("edit");
         Diary diary = diaryRepository.findOne(diaryId);
         PrivacyStatus privacy = diary.getPrivacyStatus();
         if (privacy == PrivacyStatus.PRIVATE) {
+            System.out.println("public");
             diary.setPrivacyStatus(PrivacyStatus.PUBLIC);
         }
         else{
@@ -77,19 +84,39 @@ public class DiaryService {
         return likers.size();
     }
     //월별 조회
-    public List<DiaryDTO> getDiariesByMonth(Long memberId, int year, int month) {
-        List<Diary> diaryList = diaryRepository.findDiariesByIdAndMonth(memberId, year, month);
+    public List<DiaryDTO> getDiariesByMonth(Long currentUserId, Long urlId, int year, int month) {
+        List<Diary> diaryList = diaryRepository.findDiariesByIdAndMonth(urlId, year, month);
         List<DiaryDTO> diaryDTOList = new ArrayList<>();
 
         for ( Diary diary : diaryList){
             diaryDTOList.add(mapToDTO(diary));
         }
+        diaryDTOList.sort(Comparator.comparing(DiaryDTO::getDate)); //날짜별 정렬
+        if (currentUserId != urlId){
+            for (DiaryDTO diaryDTO : diaryDTOList){
+                if (diaryDTO.getPrivacyStatus()==PrivacyStatus.PRIVATE){ diaryDTOList.remove(diaryDTO);}
+            }
+        }
         return diaryDTOList;
     }
+
     //날짜에 의한 조회 -> 이후 다이어리 조회 예정
     public Diary getDiaryIdByDate(Long memberId, int year, int month, int day) {
         return diaryRepository.findDiariesByIdAndDate(memberId, year, month, day);
     }
+
+    public boolean checkDiaryAccess(MemberDTO memberDTO, DiaryDTO diaryDTO) {
+        // 다이어리 접근권한 확인
+        if (diaryDTO.getPrivacyStatus() == PrivacyStatus.PRIVATE) {
+            // 다이어리가 private인 경우, 작성자와 현재 사용자가 동일한지 확인 - 동일하면 true 반환
+            return diaryDTO.getAuthorId().equals(memberDTO.getId());
+        } else {
+            // 다이어리가 private가 아닌 경우, 현재 사용자와 작성자가 친구인지 확인 - 친구이면 true 반환
+            return memberService.areFriends(memberDTO.getId(), diaryDTO.getAuthorId());
+        }
+    }
+
+
     private DiaryDTO mapToDTO(Diary diary) {
         DiaryDTO diaryDTO =  new DiaryDTO();
         diaryDTO.setId(diary.getId());
@@ -104,5 +131,4 @@ public class DiaryService {
         diaryDTO.setLiker(whoLiked(diary.getId()));
         return diaryDTO;
     }
-
 }

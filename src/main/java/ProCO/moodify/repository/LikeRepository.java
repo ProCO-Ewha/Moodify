@@ -16,7 +16,6 @@ import java.util.Optional;
 public class LikeRepository {
     private final EntityManager em;
 
-
     public void save(Like like) {
         em.persist(like);
     }
@@ -37,6 +36,15 @@ public class LikeRepository {
 
     public void delete(Like like) {
         em.remove(like);
+    }
+
+    public boolean existsByLikerAndDiary(Member liker, Diary diary) {
+        String jpql = "SELECT COUNT(l) FROM Like l WHERE l.liker = :liker AND l.diary = :diary";
+        Long count = em.createQuery(jpql, Long.class)
+                .setParameter("liker", liker)
+                .setParameter("diary", diary)
+                .getSingleResult();
+        return count > 0;
     }
 
 
