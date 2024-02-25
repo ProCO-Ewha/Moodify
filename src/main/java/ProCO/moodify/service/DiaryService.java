@@ -107,13 +107,15 @@ public class DiaryService {
 
     public boolean checkDiaryAccess(MemberDTO memberDTO, DiaryDTO diaryDTO) {
         // 다이어리 접근권한 확인
-        if (diaryDTO.getPrivacyStatus() == PrivacyStatus.PRIVATE) {
-            // 다이어리가 private인 경우, 작성자와 현재 사용자가 동일한지 확인 - 동일하면 true 반환
-            return diaryDTO.getAuthorId().equals(memberDTO.getId());
-        } else {
-            // 다이어리가 private가 아닌 경우, 현재 사용자와 작성자가 친구인지 확인 - 친구이면 true 반환
-            return memberService.areFriends(memberDTO.getId(), diaryDTO.getAuthorId());
+        if (diaryDTO.getAuthorId().equals(memberDTO.getId())){
+            return true;
         }
+        else {
+            if (diaryDTO.getPrivacyStatus() == PrivacyStatus.PUBLIC){
+                return memberService.areFriends(memberDTO.getId(), diaryDTO.getAuthorId());
+            }
+        }
+        return false;
     }
 
 

@@ -29,40 +29,40 @@ public class DiaryController {
     private final DiaryService diaryService;
     private final LikeService likeService;
     private final MemberService memberService;
-    @PostMapping("/new")
-    public ResponseEntity<Long> write(@AuthenticationPrincipal User user, @Valid @RequestBody DiaryForm form, BindingResult result) {
-        Long authorId = memberService.findByEmail(user.getUsername()).getId();
-        if (result.hasErrors()) { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
-        // 일기 작성 처리
-        Diary diary = new Diary();
-        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
-        diary.setEmotionStatus(form.getEmotion());
-        diary.setText(form.getTxt());
-        diary.setDate(LocalDateTime.now());
-        diary.setAlignStatus(form.getAlignStatus());
-        diary.setPrivacyStatus(form.getPrivacyStatus());
-
-        Long diaryId = diaryService.write(authorId, diary);
-        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
-    }
-    //실행시킬때마다 일기 작성하기 귀찮으면 위에 post 메소드 각주처리하고 아래 활성화 해서 실행하세요 (url에만 접속해도 일기 작성됨)
-//    @GetMapping("/new")
-//    public ResponseEntity<Long> write(@AuthenticationPrincipal User user) {
+//    @PostMapping("/new")
+//    public ResponseEntity<Long> write(@AuthenticationPrincipal User user, @Valid @RequestBody DiaryForm form, BindingResult result) {
 //        Long authorId = memberService.findByEmail(user.getUsername()).getId();
+//        if (result.hasErrors()) { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
 //        // 일기 작성 처리
 //        Diary diary = new Diary();
 //        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
-//        diary.setEmotionStatus(EmotionStatus.SURPRISED);
-//        diary.setText("form.getTxt()");
+//        diary.setEmotionStatus(form.getEmotion());
+//        diary.setText(form.getTxt());
 //        diary.setDate(LocalDateTime.now());
-//        diary.setAlignStatus(AlignStatus.RIGHT);
-//        diary.setPrivacyStatus(PrivacyStatus.PRIVATE);
+//        diary.setAlignStatus(form.getAlignStatus());
+//        diary.setPrivacyStatus(form.getPrivacyStatus());
 //
 //        Long diaryId = diaryService.write(authorId, diary);
 //        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
 //    }
+    //실행시킬때마다 일기 작성하기 귀찮으면 위에 post 메소드 각주처리하고 아래 활성화 해서 실행하세요 (url에만 접속해도 일기 작성됨)
+    @GetMapping("/new")
+    public ResponseEntity<Long> write(@AuthenticationPrincipal User user) {
+        Long authorId = memberService.findByEmail(user.getUsername()).getId();
+        // 일기 작성 처리
+        Diary diary = new Diary();
+        diary.setAuthor(memberService.findOne(authorId)); // 작성자의 ID와 관계 설정
+        diary.setEmotionStatus(EmotionStatus.SURPRISED);
+        diary.setText("form.getTxt()");
+        diary.setDate(LocalDateTime.now());
+        diary.setAlignStatus(AlignStatus.RIGHT);
+        diary.setPrivacyStatus(PrivacyStatus.PRIVATE);
 
-    @PostMapping("/{diaryId}/edit")
+        Long diaryId = diaryService.write(authorId, diary);
+        return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{diaryId}/edit")
     public ResponseEntity<Void> editDiary(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
         Long authorId = diaryService.getDiaryDetails(diaryId).getAuthorId();
         Long currentUserId = memberService.findByEmailDTO(user.getUsername()).getId();
@@ -75,6 +75,7 @@ public class DiaryController {
     public ResponseEntity<DiaryDTO> viewDiary(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
         DiaryDTO diaryDTO = diaryService.getDiaryDetails(diaryId);
         MemberDTO memberDTO = memberService.findByEmailDTO(user.getUsername());
+        System.out.println("view{diaryId}");
         if (diaryService.checkDiaryAccess( memberDTO, diaryDTO)) {
             return new ResponseEntity<>(diaryDTO, HttpStatus.OK);
         } else {

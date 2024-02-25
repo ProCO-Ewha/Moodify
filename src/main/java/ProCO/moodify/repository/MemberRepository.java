@@ -7,6 +7,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class MemberRepository {
     @PersistenceContext
     private EntityManager em;
 
+//    @Transactional
     public void save(Member member) {
         if (member.getId() == null) {
             em.persist(member);

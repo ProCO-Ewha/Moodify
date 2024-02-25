@@ -5,6 +5,7 @@ import ProCO.moodify.domain.PrivacyStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DiaryRepository {
     private final EntityManager em;
+    @Transactional
     public void save(Diary diary) {
         em.persist(diary);
     }

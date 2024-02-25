@@ -7,17 +7,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
-// 로그인 컨트롤러는 Spring Security에서 관리하므로 아예 사용되지 않음
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/login-process")
+@RequestMapping("/login")
 public class LogInController {
     private final MemberService memberService;
     @PostMapping
     public ResponseEntity<String> login(@RequestBody Map<String, String> login) {
         String email = login.get("email");
-        String password = login.get("pw");
+        String password = login.get("password");
 
         System.out.println(email);
         System.out.println(password);
