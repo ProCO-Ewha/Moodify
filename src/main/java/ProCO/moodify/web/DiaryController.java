@@ -62,7 +62,7 @@ public class DiaryController {
         return new ResponseEntity<>(diaryId, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{diaryId}/edit")
+    @PostMapping("/{diaryId}/edit")
     public ResponseEntity<Void> editDiary(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
         Long authorId = diaryService.getDiaryDetails(diaryId).getAuthorId();
         Long currentUserId = memberService.findByEmailDTO(user.getUsername()).getId();
@@ -76,7 +76,7 @@ public class DiaryController {
         DiaryDTO diaryDTO = diaryService.getDiaryDetails(diaryId);
         MemberDTO memberDTO = memberService.findByEmailDTO(user.getUsername());
         System.out.println("view{diaryId}");
-        if (diaryService.checkDiaryAccess( memberDTO, diaryDTO)) {
+            if (diaryService.checkDiaryAccess( memberDTO, diaryDTO)) {
             return new ResponseEntity<>(diaryDTO, HttpStatus.OK);
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -101,5 +101,23 @@ public class DiaryController {
                 .location(URI.create("/diaries/" + diaryId))
                 .build();
     }
-
+//    @GetMapping("/{diaryId}/like/add")
+//    public ResponseEntity<Void> addLike(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
+//        Long likerId = memberService.findByEmailDTO(user.getUsername()).getId();
+//        if (diaryService.checkDiaryAccess(memberService.findOneDTO(likerId), diaryService.getDiaryDetails(diaryId))) {
+//            likeService.addLike(likerId, diaryId);
+//        }
+//        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+//                .location(URI.create("/diaries/" + diaryId))
+//                .build();
+//    }
+//    @GetMapping("/{diaryId}/like/remove")
+//    public ResponseEntity<Void> deleteLike(@AuthenticationPrincipal User user, @PathVariable Long diaryId) {
+//        Long likerId = memberService.findByEmailDTO(user.getUsername()).getId();
+//        if (diaryService.checkDiaryAccess(memberService.findOneDTO(likerId), diaryService.getDiaryDetails(diaryId))) {
+//            likeService.cancelLike(likerId, diaryId);
+//        }        return ResponseEntity.status(HttpStatus.SEE_OTHER)
+//                .location(URI.create("/diaries/" + diaryId))
+//                .build();
+//    }
 }

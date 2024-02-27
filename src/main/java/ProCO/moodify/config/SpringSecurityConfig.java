@@ -32,8 +32,7 @@ public class SpringSecurityConfig {
                         .anyRequest().authenticated()	// 어떠한 요청이라도 인증필요
                 )
                 .formLogin(login -> login
-//                        .loginPage("/login")
-//                        .loginProcessingUrl("/login-process")    // [B] 로그인 처리 URL 지정
+                        .loginProcessingUrl("/login")    // [B] 로그인 처리 URL 지정
                         .usernameParameter("email")    // [C] 요청 본문에서 사용자 아이디를 어떻게 찾을지 지정
                         .passwordParameter("password")    // [D] 요청 본문에서 비밀번호를 어떻게 찾을지 지정
                         .defaultSuccessUrl("/calendar/redirect-calendar", true)

@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class MemberService {
     @Autowired
     MemberRepository memberRepository;
+//    private final MemberRepositoryInterface memberRepositoryImpl;
 
     //회원등록
     @Transactional

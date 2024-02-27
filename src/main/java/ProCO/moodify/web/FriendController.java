@@ -33,6 +33,15 @@ public class FriendController {
         String message = "친구 추가가 성공적으로 처리되었습니다.";
         return ResponseEntity.ok().body(message);
     }
+//    @GetMapping("/add")
+//    public ResponseEntity<String> addFriend(@AuthenticationPrincipal User user) {
+//        String currentUserEmail = user.getUsername();
+//        Long currentUserId = memberService.findByEmail(currentUserEmail).getId();
+//        System.out.println("add?");
+//        memberService.addFriend(currentUserId, 1L);
+//        String message = "친구 추가가 성공적으로 처리되었습니다.";
+//        return ResponseEntity.ok().body(message);
+//    }
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteFriend(@AuthenticationPrincipal User user, @RequestBody Long deleteId) {
         String currentUserEmail = user.getUsername();
