@@ -240,28 +240,60 @@ const [isAdding, setIsAdding] = useState(false);
 const [isModalOpen, setModalOpen] = useState(false);
 const [selectedFriendId, setSelectedFriendId] = useState(null); 
 const [diaries, setDiaries] = useState([]);
+
 const navigate = useNavigate();
-const [friends, setFriends] = useState([
-  { id: 1, nickname: 'friend1' },
-  { id: 2, nickname: 'friend2' },
-  { id: 3, nickname: 'friend1' },
-  { id: 4, nickname: 'friend2' },
-  { id: 5, nickname: 'friend1' },
-  { id: 6, nickname: 'friend2' },
-  { id: 7, nickname: 'friend1' },
-  { id: 8, nickname: 'friend2' },
-  { id: 9, nickname: 'friend1' },
-  { id: 10, nickname: 'friend2' },
-  // ...
-]);
+const [friends, setFriends] = useState([]);
+const [username, setUsername] = useState('');
+const [token, setToken] = useState('');
+
+axios.post('http://localhost:8080/login', { /* 로그인 정보 */ })
+  .then(response => {
+    setUsername(response.data.username);
+    setToken(response.data.token);
+  });
+
+// useEffect 내에서 username과 token, 그리고 선택된 년/월을 사용하여 API를 호출합니다.
+useEffect(() => {
+  if (username && token && selectedYearMonth) {
+    const [year, month] = selectedYearMonth.split('-');
+    axios.get(`http://localhost:8080/calendar/${username}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      params: {
+        year,
+        month
+      }
+    })
+    .then(response => {
+      setFriends(response.data.friends);
+      setDiaryEntries(response.data.monthly);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+  }
+}, [username, token, selectedYearMonth]);
+
+/*useEffect(() => {
+  axios.get(`http://localhost:8080/calendar/${username}?year=${year}&month=${month}`)
+    .then(response => {
+      setDiaryEntries(response.data.monthly);
+    });
+}, [selectedYearMonth]);*/
+
+useEffect(() => {
+  // selectedYearMonth에서 year와 month를 추출합니다.
+  const [year, month] = selectedYearMonth.split('-');
+  
+  axios.get(`http://localhost:8080/calendar/${username}?year=${year}&month=${month}`)
+    .then(response => {
+      setDiaryEntries(response.data.monthly || []);
+    });
+}, [selectedYearMonth, username]);
 
 
 /*useEffect(() => {
-axios.get('api/diaryEntries')
-.then(response => setDiaryEntries(response.data));
-}, []);*/
-
-useEffect(() => {
   if (selectedYearMonth) {
     // 가짜 데이터
     const fakeData = [
@@ -271,15 +303,10 @@ useEffect(() => {
     ];
     setDiaryEntries(fakeData);
   }
-}, [selectedYearMonth]);
+}, [selectedYearMonth]);*/
+
 
 /*useEffect(() => {
-  // 친구 목록을 가지고 오는 API 호출
-  axios.get('/api/friends')
-    .then(response => setFriends(response.data));
-}, []);
-
-useEffect(() => {
   // 선택한 친구의 일기 목록을 가지고 오는 API 호출
   if (selectedFriendId) {
     axios.get(`/api/diaries/${selectedFriendId}`)
@@ -287,21 +314,30 @@ useEffect(() => {
   }
 }, [selectedFriendId]);*/
 
-const handleAddDiary = (diaryText, selectedDate) => {
-  const newEntry = { date: selectedDate, emoji: selectedEmoji, text: diaryText};
+const handleAddDiary = (diaryText, selectedDate, isPublic, selectedEmoji) => {
+  // 백엔드에서 요구하는 데이터 형식에 맞춰 객체를 생성합니다.
+  const newEntry = {
+    emotion: selectedEmoji, // 사용자가 선택한 이모지에 따라서 변경
+    txt: diaryText,
+    privacyStatus: isPublic ? 'PUBLIC' : 'PRIVATE' // isPublic 상태에 따라서 privacyStatus를 설정합니다.
+  };
 
- /* axios.post('/api/diaryEntries', newEntry)
+  axios.post('http://localhost:8080/diaries/new', newEntry)
     .then(response => {
-      if (response.status === 200) {
+      if (response.status === 201) { // 백엔드에서 201 Created 상태 코드를 반환합니다.
+        // 백엔드에서 새로 생성된 diary의 ID를 반환하므로, 이를 사용하여 newEntry를 업데이트해야 합니다.
+        newEntry.id = response.data;
         setDiaryEntries([
           ...diaryEntries,
           newEntry
         ]);
         setSelectedEmoji('');
         setDiaryModalShown(false);
+        setSelectedYearMonth(selectedYearMonth)
       }
-    });*/
+    });
 };
+
 
 const handleYearMonthClick = () => {
   setModalOpen(prevState => !prevState);
@@ -361,7 +397,7 @@ const handleOpenFindfriendsPage = () =>{
   navigate('/Findfriends');
 }
 
-const handleLike = (id) => {
+/*const handleLike = (id) => {
   // 좋아요 기능을 처리하는 함수
   axios.post(`/api/diaries/${id}/like`)
     .then(response => {
@@ -369,15 +405,8 @@ const handleLike = (id) => {
         setDiaries(diaries.map(diary => diary.id === id ? { ...diary, isLiked: !diary.isLiked } : diary));
       }
     });
-};
-
-/*const handleFriendClick = async (friendId) => {
-  // 백엔드에 친구의 최신 달력 정보를 요청
-  const response = await axios.get(`/api/friends/${friendId}/latest-calendar`);
-  const { year, month } = response.data;
-  // 받은 정보로 해당 친구의 달력 페이지로 이동
-  navigate(`/friend-calendar/${friendId}/${year}-${month}`);
 };*/
+
 
 const handleFriendClick = (friendId) => {
   // 가상의 년도와 월을 사용하여 해당 친구의 달력 페이지로 이동

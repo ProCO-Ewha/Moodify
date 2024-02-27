@@ -62,7 +62,7 @@ const DiaryModal = ({ onAdd, onClose, selectedEmoji, selectedText, selectedDate:
 
 
   const handleSubmit = () => {
-    onAdd(diaryText, selectedDate);
+    onAdd(diaryText, selectedDate, isPublic, selectedEmoji);
     setDiaryText(''); 
     setSelectedDate(''); 
     //setSelectedImage(null);

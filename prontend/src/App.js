@@ -63,7 +63,7 @@ function Home() {
         <p id="logo-text">moodify</p>
       </div>
       <div className="black-button-group">
-        <a href="http://localhost:8080/login">
+        <a href="/LoginPage">
           <button>START</button>
         </a>
       </div>

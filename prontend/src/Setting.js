@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 import BackButton from './BackButton'
 import  { useState } from 'react';
@@ -131,15 +132,29 @@ function Setting() {
     setConfirmPassword(e.target.value);
   };
 
-  const handleSubmitName = (e) => {
+  /*const handleSubmitName = (e) => {
     e.preventDefault();
     // 실제로는 여기에서 서버로 이름 변경 요청을 보낼 수 있습니다.
     console.log('새로운 이름:', name);
     setName('');
     setMessage('이름이 변경되었습니다.');
+  };*/
+
+  const handleSubmitName = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.put('http://localhost:8080/members/edit', {
+        name
+      });
+      setName('');
+      setMessage(response.data);
+    } catch (error) {
+      console.error(error);
+      setMessage('이름 변경 중 오류가 발생했습니다.');
+    }
   };
 
-  const handleSubmitPassword = (e) => {
+  /*const handleSubmitPassword = (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       setMessage('새 비밀번호와 확인 비밀번호가 일치하지 않습니다.');
@@ -149,6 +164,25 @@ function Setting() {
       setNewPassword('');
       setConfirmPassword('');
       setMessage('비밀번호가 변경되었습니다.');
+    }
+  };*/
+
+  const handleSubmitPassword = async (e) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setMessage('새 비밀번호와 확인 비밀번호가 일치하지 않습니다.');
+    } else {
+      try {
+        const response = await axios.put('http://localhost:8080/members/edit', {
+          pw: newPassword
+        });
+        setNewPassword('');
+        setConfirmPassword('');
+        setMessage(response.data);
+      } catch (error) {
+        console.error(error);
+        setMessage('비밀번호 변경 중 오류가 발생했습니다.');
+      }
     }
   };
 
