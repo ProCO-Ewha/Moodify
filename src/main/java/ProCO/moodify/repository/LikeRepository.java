@@ -4,6 +4,7 @@ import ProCO.moodify.domain.Diary;
 import ProCO.moodify.domain.Like;
 import ProCO.moodify.domain.Member;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
